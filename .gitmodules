@@ -1,0 +1,4 @@
+[submodule "lib/youbot_driver"]
+	path = lib/youbot_driver
+	url = https://github.com/youbot/youbot_driver.git
+	branch = cmake
