@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.28)
+
+project(youbot_lidar_nav)
+
+include(GNUInstallDirs)
+
+add_subdirectory(src)
