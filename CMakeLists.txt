@@ -4,4 +4,6 @@ project(youbot_lidar_nav)
 
 include(GNUInstallDirs)
 
+add_subdirectory(lib)
+
 add_subdirectory(src)
