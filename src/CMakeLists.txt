@@ -1,8 +1,10 @@
+ADD_DEFINITIONS(-DSOURCE_DIR="${PROJECT_SOURCE_DIR}/")
+
 add_executable(YouBotLidarNav)
 
-target_compile_features(YouBotLidarNav PUBLIC cxx_std_11)
+target_compile_features(YouBotLidarNav PUBLIC cxx_std_20)
 
-target_link_libraries(YouBotLidarNav YouBotDriver)
+target_link_libraries(YouBotLidarNav YouBotDriver yaml-cpp)
 
 target_include_directories(
     YouBotLidarNav
@@ -15,4 +17,6 @@ target_sources(
     YouBotLidarNav
   PRIVATE 
     main.cpp
+    logger.cpp
+    driver.cpp
 )
