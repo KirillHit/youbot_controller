@@ -1,5 +1,4 @@
 logger:
-  verbose: true         # output data to the terminal
   debug: true           # output debug information
   save: true            # write data to file
   save_path: ""         # default: source_dir/log/<timestamp>.log

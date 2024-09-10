@@ -9,15 +9,17 @@ using namespace ybot_ln;
 
 void init_config()
 {
+    // TODO add try
+
+    LOGGER_STREAM(MSG_LVL::INFO, "Launch started, loading parameters");
+
     YAML::Node config =
         YAML::LoadFile(std::string(SOURCE_DIR) + "config/youbot_config.yaml");
 
     Logger &logger = Logger::get_logger();
-    logger.set_verbose(config["logger"]["verbose"].as<bool>());
     logger.set_debug(config["logger"]["debug"].as<bool>());
-    logger.set_save_prm(config["logger"]["debug"].as<bool>(), config["logger"]["save_path"].as<std::string>());
-
-    LOGGER_STREAM(logger, MSG_LVL::INFO, "Start " << "init");
+    logger.set_save(config["logger"]["debug"].as<bool>(),
+                    config["logger"]["save_path"].as<std::string>());
 }
 
 int main()
