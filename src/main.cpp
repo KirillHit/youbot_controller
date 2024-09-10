@@ -4,6 +4,8 @@
 #include "yaml-cpp/yaml.h"
 #include "youbot_driver/youbot/YouBotBase.hpp"
 #include "youbot_lidar_nav/logger.hpp"
+#include "urg_sensor.h"
+#include "urg_utils.h"
 
 using namespace ybot_ln;
 

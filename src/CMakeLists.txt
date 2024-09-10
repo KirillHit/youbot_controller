@@ -4,13 +4,14 @@ add_executable(YouBotLidarNav)
 
 target_compile_features(YouBotLidarNav PUBLIC cxx_std_20)
 
-target_link_libraries(YouBotLidarNav YouBotDriver yaml-cpp)
+target_link_libraries(YouBotLidarNav YouBotDriver yaml-cpp ${SOURCE_DIR}/current/src/liburg_cpp.so)
 
 target_include_directories(
     YouBotLidarNav
   PUBLIC 
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
     $<TARGET_PROPERTY:YouBotDriver,INCLUDE_DIRECTORIES>
+    $<BUILD_INTERFACE:${SOURCE_DIR}/current/include/c>
 )
 
 target_sources(
