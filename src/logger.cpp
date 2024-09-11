@@ -14,7 +14,7 @@
 #define CYAN "\033[36m"    /* Cyan */
 #define WHITE "\033[37m"   /* White */
 
-namespace ybot_ln
+namespace ybotln
 {
 
 Logger &Logger::get_logger()
@@ -41,7 +41,8 @@ void Logger::operator()(const MSG_LVL &lvl, const std::string &str)
     std::string log_str = std::format("[{}][{}]: {}", get_time(),
                                       msg_lvl[static_cast<size_t>(lvl)], str);
 
-    std::cout << msg_clr[static_cast<size_t>(lvl)] << log_str << RESET << std::endl;
+    std::cout << msg_clr[static_cast<size_t>(lvl)] << log_str << RESET
+              << std::endl;
 
     if (save)
     {
@@ -74,4 +75,4 @@ void Logger::set_save(const bool &n_save, const std::string n_save_path)
     // TODO
 }
 
-} // namespace ybot_ln
+} // namespace ybotln
