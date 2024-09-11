@@ -9,22 +9,35 @@ using namespace ybot_ln;
 
 void init_config()
 {
-    // TODO add try
-
-    LOGGER_STREAM(MSG_LVL::INFO, "Launch started, loading parameters");
+    LOGGER_STREAM(MSG_LVL::INFO, "Loading parameters...");
 
     YAML::Node config =
         YAML::LoadFile(std::string(SOURCE_DIR) + "config/youbot_config.yaml");
 
     Logger &logger = Logger::get_logger();
     logger.set_debug(config["logger"]["debug"].as<bool>());
-    logger.set_save(config["logger"]["debug"].as<bool>(),
+    logger.set_save(config["logger"]["save"].as<bool>(),
                     config["logger"]["save_path"].as<std::string>());
 }
 
-int main()
+int main(int argc, char* argv[])
 {
-    init_config();
+    LOGGER_STREAM(MSG_LVL::INFO, "Start initialization...");
+    
+    //if (argc > 0) TODO config path
+
+    try
+    {
+        init_config();
+    }
+    catch (const YAML::BadFile &e)
+    {
+        LOGGER_STREAM(MSG_LVL::ERROR, "Failed to load parameters. " << e.msg);
+    }
+    catch (const YAML::RepresentationException &e)
+    {
+        LOGGER_STREAM(MSG_LVL::ERROR, "Failed to load parameters. " << e.msg);
+    }
 
     /* try
     {

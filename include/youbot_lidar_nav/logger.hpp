@@ -9,7 +9,7 @@
     ({                                                                         \
         static_assert(                                                         \
             ::std::is_same<decltype(lvl), typename ::ybot_ln::MSG_LVL>::value, \
-            "First argument to logging macros must be an ybot_ln::MSG_LVL");  \
+            "First argument to logging macros must be an ybot_ln::MSG_LVL");   \
         std::stringstream ss;                                                  \
         ss << stream;                                                          \
         Logger::get_logger()(lvl, ss.str());                                   \
