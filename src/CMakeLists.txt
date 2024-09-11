@@ -1,15 +1,15 @@
 ADD_DEFINITIONS(-DSOURCE_DIR="${PROJECT_SOURCE_DIR}/")
 
-add_executable(YouBotLidarNav)
+add_executable(youbot_lidar_nav)
 
-target_compile_features(YouBotLidarNav PUBLIC cxx_std_20)
+target_compile_features(youbot_lidar_nav PUBLIC cxx_std_20)
 
-add_dependencies(YouBotLidarNav urg_library)
+add_dependencies(youbot_lidar_nav urg_library)
 
-target_link_libraries(YouBotLidarNav YouBotDriver yaml-cpp ${urg_library_LIB})
+target_link_libraries(youbot_lidar_nav YouBotDriver yaml-cpp ${urg_library_LIB})
 
 target_include_directories(
-    YouBotLidarNav
+    youbot_lidar_nav
   PUBLIC 
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
     $<TARGET_PROPERTY:YouBotDriver,INCLUDE_DIRECTORIES>
@@ -17,9 +17,14 @@ target_include_directories(
 )
 
 target_sources(
-    YouBotLidarNav
+    youbot_lidar_nav
   PRIVATE 
-    main.cpp
+    youbot_lidar_nav.cpp
     logger.cpp
     driver.cpp
 )
+
+install(
+  TARGETS
+    youbot_lidar_nav
+  DESTINATION bin)
