@@ -4,6 +4,8 @@ add_executable(YouBotLidarNav)
 
 target_compile_features(YouBotLidarNav PUBLIC cxx_std_20)
 
+add_dependencies(YouBotLidarNav urg_library)
+
 target_link_libraries(YouBotLidarNav YouBotDriver yaml-cpp ${urg_library_LIB})
 
 target_include_directories(
