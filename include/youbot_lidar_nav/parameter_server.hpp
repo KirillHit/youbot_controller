@@ -10,7 +10,11 @@
 namespace ybotln
 {
 
-class IParametersObserver;
+class IParametersObserver
+{
+  public:
+    virtual void handleEvent(const std::string name) = 0;
+};
 
 class ParameterServer
 {
@@ -30,12 +34,6 @@ class ParameterServer
     template <class T> std::map<std::string, T> &get_params_map();
     std::map<std::string, IParametersObserver *> observers;
     void notify(const std::string name);
-};
-
-class IParametersObserver
-{
-  public:
-    virtual void handleEvent(const std::string name) = 0;
 };
 
 template <class T> const T &ParameterServer::get(const std::string name)
