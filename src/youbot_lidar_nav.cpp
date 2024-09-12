@@ -24,9 +24,10 @@ void init_config()
 
     PARAMETERS.set("debug", config["logger"]["debug"].as<bool>());
     PARAMETERS.set("save", config["logger"]["save"].as<bool>());
-    PARAMETERS.set("save_path", config["logger"]["save_path"].as<std::string>());
+    PARAMETERS.set("save_path",
+                   config["logger"]["save_path"].as<std::string>());
 
-    LOGGER_STREAM(MSG_LVL::INFO, "Loading parameters completed successfully.");
+    LOGGER_STREAM(MSG_LVL::DEBUG, "Loading parameters completed successfully.");
 }
 
 void parse(int argc, char *argv[])
@@ -46,9 +47,22 @@ void parse(int argc, char *argv[])
     PARAMETERS.set<std::string>("config_path", argv[1]);
 }
 
+void init_observers()
+{
+    Logger *logger = &Logger::get_logger();
+    PARAMETERS.add_observer("debug",
+                            dynamic_cast<IParametersObserver *>(logger));
+    PARAMETERS.add_observer("save",
+                            dynamic_cast<IParametersObserver *>(logger));
+    PARAMETERS.add_observer("save_path",
+                            dynamic_cast<IParametersObserver *>(logger));
+}
+
 int main(int argc, char *argv[])
 {
     LOGGER_STREAM(MSG_LVL::INFO, "Start initialization...");
+
+    init_observers();
 
     parse(argc, argv);
 
@@ -58,11 +72,11 @@ int main(int argc, char *argv[])
     }
     catch (const YAML::BadFile &e)
     {
-        LOGGER_STREAM(MSG_LVL::ERROR, "Failed to load parameters. " << e.msg);
+        LOGGER_STREAM(MSG_LVL::ERROR, "Failed to load parameters! " << e.msg);
     }
     catch (const YAML::RepresentationException &e)
     {
-        LOGGER_STREAM(MSG_LVL::ERROR, "Failed to load parameters. " << e.msg);
+        LOGGER_STREAM(MSG_LVL::ERROR, "Failed to load parameters! " << e.msg);
     }
 
     return 0;

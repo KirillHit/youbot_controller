@@ -36,10 +36,6 @@ class IParametersObserver
 {
   public:
     virtual void handleEvent(const std::string name) = 0;
-    virtual ~IParametersObserver()
-    {
-        ParameterServer::get_parameters().remove_observer(this);
-    }
 };
 
 template <class T> const T &ParameterServer::get(const std::string name)
