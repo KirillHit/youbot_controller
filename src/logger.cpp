@@ -79,7 +79,7 @@ void Logger::set_save(const bool &n_save, const std::string n_save_path)
     // TODO
 }
 
-void Logger::handleEvent(const std::string name)
+void Logger::handle_event(const std::string name)
 {
     if (name == "debug")
     {

@@ -15,6 +15,13 @@ void ParameterServer::add_observer(const std::string name,
     observers[name] = ref;
 }
 
+void ParameterServer::init_observer(IParametersObserver *observer)
+{
+    for (auto const &[key, val] : observers)
+        if (val == observer)
+            notify(key);
+}
+
 void ParameterServer::remove_observer(const std::string name)
 {
     observers.erase(name);
@@ -37,7 +44,7 @@ void ParameterServer::notify(const std::string name)
     {
         return;
     }
-    observers[name]->handleEvent(name);
+    observers[name]->handle_event(name);
 }
 
 } // namespace ybotln

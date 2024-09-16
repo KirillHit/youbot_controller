@@ -13,7 +13,7 @@ namespace ybotln
 class IParametersObserver
 {
   public:
-    virtual void handleEvent(const std::string name) = 0;
+    virtual void handle_event(const std::string name) = 0;
 };
 
 class ParameterServer
@@ -24,6 +24,7 @@ class ParameterServer
     template <class T> void set(const std::string name, const T value);
     template <class T> bool exist(const std::string name);
     void add_observer(const std::string name, IParametersObserver *ref);
+    void init_observer(IParametersObserver *observer);
     void remove_observer(const std::string name);
     void remove_observer(IParametersObserver *observer);
 

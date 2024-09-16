@@ -35,7 +35,7 @@ class Logger : public IParametersObserver
     void operator()(const MSG_LVL &lvl, const std::string &str);
     void set_debug(const bool &n_debug);
     void set_save(const bool &n_save, const std::string n_save_path = "");
-    void handleEvent(const std::string name) override;
+    void handle_event(const std::string name) override;
 
   private:
     Logger();
