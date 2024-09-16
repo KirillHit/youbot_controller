@@ -5,3 +5,6 @@ logger:
 driver:
   max_leaner_vel: 0.5   # m/s
   reconnect_delay: 1000 # ms
+tcp_server:
+  port: 10000
+  timeout: 500          # ms

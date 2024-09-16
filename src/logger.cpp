@@ -40,7 +40,7 @@ void Logger::operator()(const MSG_LVL &lvl, const std::string &str)
 
     constexpr std::string_view msg_lvl[] = {"INFO", "DEBUG", "WARN", "ERROR",
                                             "FATAL"};
-    constexpr std::string_view msg_clr[] = {BLUE, GREEN, YELLOW, RED, RED};
+    constexpr std::string_view msg_clr[] = {RESET, GREEN, YELLOW, RED, RED};
 
     std::string log_str = std::format("[{}][{}]: {}", get_time(),
                                       msg_lvl[static_cast<size_t>(lvl)], str);

@@ -1,5 +1,6 @@
 add_subdirectory(youbot_driver)
 add_subdirectory(yaml-cpp)
+add_subdirectory(simple_socket)
 
 # installing lidar driver
 find_program(MAKE_EXE NAMES gmake nmake make)

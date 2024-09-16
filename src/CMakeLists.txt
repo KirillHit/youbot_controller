@@ -6,7 +6,7 @@ target_compile_features(youbot_lidar_nav PUBLIC cxx_std_20)
 
 add_dependencies(youbot_lidar_nav urg_library)
 
-target_link_libraries(youbot_lidar_nav YouBotDriver yaml-cpp ${urg_library_LIB})
+target_link_libraries(youbot_lidar_nav YouBotDriver yaml-cpp simple_socket ${urg_library_LIB})
 
 target_include_directories(
     youbot_lidar_nav
@@ -23,6 +23,7 @@ target_sources(
     logger.cpp
     driver.cpp
     parameter_server.cpp
+    tcp_server.cpp
 )
 
 install(
