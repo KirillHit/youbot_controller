@@ -20,10 +20,11 @@ target_sources(
     youbot_lidar_nav
   PRIVATE 
     youbot_lidar_nav.cpp
-    logger.cpp
     driver.cpp
-    parameter_server.cpp
     tcp_server.cpp
+    utils/parameter_server.cpp
+    utils/thread_pool.cpp
+    utils/logger.cpp
 )
 
 install(

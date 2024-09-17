@@ -2,7 +2,7 @@
 #include <format>
 #include <string>
 
-#include "youbot_lidar_nav/logger.hpp"
+#include "youbot_lidar_nav/utils/logger.hpp"
 
 #define RESET "\033[0m"
 #define BLACK "\033[30m"   /* Black */

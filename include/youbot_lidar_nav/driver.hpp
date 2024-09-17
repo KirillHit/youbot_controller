@@ -1,8 +1,8 @@
 #ifndef DRIVER_HPP
 #define DRIVER_HPP
 
-#include "logger.hpp"
-#include "parameter_server.hpp"
+#include "utils/logger.hpp"
+#include "utils/parameter_server.hpp"
 #include "youbot_driver/youbot/YouBotBase.hpp"
 
 namespace ybotln
