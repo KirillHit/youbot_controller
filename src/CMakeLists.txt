@@ -23,7 +23,7 @@ target_sources(
     driver.cpp
     tcp_server.cpp
     utils/parameter_server.cpp
-    utils/thread_pool.cpp
+    utils/task_thread.cpp
     utils/logger.cpp
 )
 
