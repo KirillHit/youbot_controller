@@ -56,7 +56,7 @@ void init_config()
 
 void start_control()
 {
-    static TcpServer tcp_server;
+    static TcpServer tcp_server; // TODO del static
     
     Driver youbot_driver;
 

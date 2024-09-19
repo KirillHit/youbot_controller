@@ -34,9 +34,7 @@ void ParameterServer::remove_observer(IParametersObserver *observer)
             observers.erase(key);
 }
 
-ParameterServer::ParameterServer()
-{
-}
+ParameterServer::ParameterServer() {}
 
 void ParameterServer::notify(const std::string name)
 {
@@ -45,6 +43,11 @@ void ParameterServer::notify(const std::string name)
         return;
     }
     observers[name]->handle_event(name);
+}
+
+IParametersObserver::~IParametersObserver()
+{
+    PARAMETERS.remove_observer(this);
 }
 
 } // namespace ybotln

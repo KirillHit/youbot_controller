@@ -14,6 +14,7 @@ class IParametersObserver
 {
   public:
     virtual void handle_event(const std::string name) = 0;
+    virtual ~IParametersObserver();
 };
 
 class ParameterServer
