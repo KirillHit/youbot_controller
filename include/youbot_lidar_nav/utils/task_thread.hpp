@@ -25,7 +25,7 @@ class Task
     void stop();
     void join();
     std::string get_name() const;
-    void set_task_poll(TaskPool * n_pool);
+    void set_task_poll(TaskPool *n_pool);
     void emit_command(std::string name, std::shared_ptr<Command> command);
     void process_commands();
 
@@ -55,7 +55,7 @@ class TaskPool
     TaskPool() = default;
     ~TaskPool() = default;
 
-    void add_task(std::unique_ptr<Task> task);
+    void add_task(std::unique_ptr<Task> &&task);
     void add_command(std::string name, std::shared_ptr<Command> command);
     std::queue<std::shared_ptr<Command>> get_commands(std::string name);
 

@@ -4,26 +4,14 @@
 namespace ybotln
 {
 
-DriverTask::DriverTask(std::string name) : Task(name) {}
+Driver::Driver() : youbot_base("youbot-base", std::string(SOURCE_DIR) + "config/") {}
 
-void DriverTask::task()
+Driver::~Driver()
 {
-    while (stop_flag)
-    {
-        try
-        {
-            LOGGER_STREAM(MSG_LVL::INFO, "Connecting to the youbot base...");
-            youbot::YouBotBase youbot_base("youbot-base", std::string(SOURCE_DIR) + "config/");
-            youbot_base.doJointCommutation();
-        }
-        catch (const std::runtime_error &e)
-        {
-            LOGGER_STREAM(MSG_LVL::ERROR, e.what());
-        }
-    }
+    stop();
 }
 
-void DriverTask::stop(youbot::YouBotBase &youbot_base)
+void Driver::stop()
 {
     youbot::JointVelocitySetpoint setVel;
     setVel.angularVelocity = 0 * radian_per_second;
@@ -33,8 +21,8 @@ void DriverTask::stop(youbot::YouBotBase &youbot_base)
     youbot_base.getBaseJoint(4).setData(setVel);
 }
 
-void DriverTask::set_speed(youbot::YouBotBase &youbot_base, const double &longitudinal_vel,
-                           const double &transversal_vel, const double &angular_vel)
+void Driver::set_speed(const double &longitudinal_vel, const double &transversal_vel,
+                       const double &angular_vel)
 {
 
     quantity<si::velocity> longitudinalVelocity =
@@ -44,6 +32,26 @@ void DriverTask::set_speed(youbot::YouBotBase &youbot_base, const double &longit
     quantity<si::angular_velocity> angularVelocity = angular_vel * radian_per_second;
 
     youbot_base.setBaseVelocity(longitudinalVelocity, transversalVelocity, angularVelocity);
+}
+
+DriverTask::DriverTask(std::string name) : Task(name) {}
+
+void DriverTask::task()
+{
+    while (!stop_flag)
+    {
+        try
+        {
+            LOGGER_STREAM(MSG_LVL::INFO, "Connecting to the youbot base...");
+            driver = std::make_unique<Driver>();
+        }
+        catch (const std::runtime_error &e)
+        {
+            LOGGER_STREAM(MSG_LVL::ERROR, e.what());
+        }
+        std::this_thread::sleep_for(
+            std::chrono::milliseconds(PARAMETERS.get<int>("driver/reconnect_delay")));
+    }
 }
 
 } // namespace ybotln

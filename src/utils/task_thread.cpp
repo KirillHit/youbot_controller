@@ -26,9 +26,8 @@ void Task::set_task_poll(TaskPool *n_pool)
 
 void Task::task_dec()
 {
-    running = true;
-    stop_flag = false;
-    LOGGER_STREAM(MSG_LVL::INFO, "The task " << get_name() << " started...");
+    //stop_flag = false;
+    LOGGER_STREAM(MSG_LVL::INFO, "The task " << log_name() << " started...");
     try
     {
         task();
@@ -36,37 +35,39 @@ void Task::task_dec()
     catch (const std::exception &e)
     {
         LOGGER_STREAM(MSG_LVL::ERROR,
-                      "The task " << get_name() << " terminated with exception: " << e.what());
+                      "The task " << log_name() << " terminated with exception: " << e.what());
     }
-    LOGGER_STREAM(MSG_LVL::INFO, "The task " << get_name() << " completed");
-    running = false;
+    LOGGER_STREAM(MSG_LVL::INFO, "The task " << log_name() << " completed");
 }
 
 void Task::start()
 {
     if (running)
     {
-        LOGGER_STREAM(MSG_LVL::DEBUG, "The task " << get_name() << " is already running");
+        LOGGER_STREAM(MSG_LVL::DEBUG, "The task " << log_name() << " is already running");
         return;
     }
+    stop_flag = false;
     task_thread = std::thread{&Task::task_dec, this};
+    running = true;
 }
 
 void Task::stop()
 {
     if (!running)
     {
-        LOGGER_STREAM(MSG_LVL::DEBUG, "The task is not running");
+        LOGGER_STREAM(MSG_LVL::DEBUG, "The task " << log_name() << "is not running");
         return;
     }
     stop_flag = true;
+    join();
+    running = false;
 }
 
 void Task::join()
 {
-    if (!running)
+    if (!task_thread.joinable())
     {
-        LOGGER_STREAM(MSG_LVL::DEBUG, "The task is not running");
         return;
     }
     task_thread.join();
@@ -75,7 +76,6 @@ void Task::join()
 Task::~Task()
 {
     stop();
-    join();
 }
 
 void TaskPool::start(std::string name)
@@ -122,7 +122,7 @@ void TaskPool::stop_all()
     }
 }
 
-void TaskPool::add_task(std::unique_ptr<Task> task)
+void TaskPool::add_task(std::unique_ptr<Task> &&task)
 {
     std::lock_guard<std::mutex> lock(tasks_lock);
     std::string name = task->get_name();

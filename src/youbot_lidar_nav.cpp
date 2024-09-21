@@ -1,6 +1,7 @@
 #include <chrono>
 #include <csignal>
 #include <iostream>
+#include <semaphore>
 #include <thread>
 #include <vector>
 
@@ -13,10 +14,11 @@
 
 using namespace ybotln;
 
+std::binary_semaphore signal_smph(0);
 void sigint_handler(int signal)
 {
     LOGGER_STREAM(MSG_LVL::INFO, "Caught terminal interrupt signal. Stopping...");
-    PARAMETERS.set("running", false);
+    signal_smph.release();
 }
 
 void init_default_parameters()
@@ -38,6 +40,7 @@ void init_config()
     PARAMETERS.set("logger/debug", config["logger"]["debug"].as<bool>());
     PARAMETERS.set("logger/save_path", config["logger"]["save_path"].as<std::string>());
     PARAMETERS.set("logger/save", config["logger"]["save"].as<bool>());
+    Logger::get_logger().set_debug(true); // TODO update
     PARAMETERS.set("driver/max_leaner_vel", config["driver"]["max_leaner_vel"].as<double>());
     PARAMETERS.set("driver/reconnect_delay", config["driver"]["reconnect_delay"].as<int>());
     PARAMETERS.set("tcp_server/port", config["tcp_server"]["port"].as<int>());
@@ -67,13 +70,18 @@ int main()
         LOGGER_STREAM(MSG_LVL::ERROR, "Failed to load parameters! " << e.msg);
     }
 
-    while (PARAMETERS.get<bool>("running"))
-    {
-        
+    TaskPool task_pool;
 
-        std::this_thread::sleep_for(
-            std::chrono::milliseconds(PARAMETERS.get<int>("reconnect_delay")));
-    }
+    auto driver_task = std::make_unique<DriverTask>("driver_task");
+    task_pool.add_task(std::move(driver_task));
+
+    task_pool.start_all();
+
+    signal_smph.acquire();
+
+    task_pool.stop_all();
+
+    LOGGER_STREAM(MSG_LVL::INFO, "All threads stopped. Exiting program.");
 
     return 0;
 }
