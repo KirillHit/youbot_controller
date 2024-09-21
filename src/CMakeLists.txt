@@ -19,10 +19,8 @@ target_include_directories(
 target_sources(
     youbot_lidar_nav
   PRIVATE
-    utils/parameter_server.cpp
     utils/task_thread.cpp
     utils/logger.cpp
-    # utils/command_server.cpp
     youbot_lidar_nav.cpp
     driver.cpp
     tcp_server.cpp

@@ -23,13 +23,7 @@ Logger &Logger::get_logger()
     return single_instance;
 }
 
-Logger::Logger()
-{
-    PARAMETERS.add_observer("debug", dynamic_cast<IParametersObserver *>(this));
-    PARAMETERS.add_observer("save", dynamic_cast<IParametersObserver *>(this));
-    PARAMETERS.add_observer("save_path",
-                            dynamic_cast<IParametersObserver *>(this));
-}
+Logger::Logger() {}
 
 void Logger::operator()(const MSG_LVL &lvl, const std::string &str)
 {
@@ -38,15 +32,13 @@ void Logger::operator()(const MSG_LVL &lvl, const std::string &str)
         return;
     }
 
-    constexpr std::string_view msg_lvl[] = {"INFO", "DEBUG", "WARN", "ERROR",
-                                            "FATAL"};
+    constexpr std::string_view msg_lvl[] = {"INFO", "DEBUG", "WARN", "ERROR", "FATAL"};
     constexpr std::string_view msg_clr[] = {RESET, GREEN, YELLOW, RED, RED};
 
-    std::string log_str = std::format("[{}][{}]: {}", get_time(),
-                                      msg_lvl[static_cast<size_t>(lvl)], str);
+    std::string log_str =
+        std::format("[{}][{}]: {}", get_time(), msg_lvl[static_cast<size_t>(lvl)], str);
 
-    std::cout << msg_clr[static_cast<size_t>(lvl)] << log_str << RESET
-              << std::endl;
+    std::cout << msg_clr[static_cast<size_t>(lvl)] << log_str << RESET << std::endl;
 
     if (save)
     {
@@ -77,22 +69,6 @@ void Logger::set_debug(const bool &n_debug)
 void Logger::set_save(const bool &n_save, const std::string n_save_path)
 {
     // TODO
-}
-
-void Logger::handle_event(const std::string name)
-{
-    if (name == "debug")
-    {
-        set_debug(PARAMETERS.get<bool>("debug"));
-        return;
-    }
-
-    if ((name == "save") || (name == "save_path"))
-    {
-        set_save(PARAMETERS.get<bool>("save"),
-                 PARAMETERS.get<std::string>("save_path"));
-        return;
-    }
 }
 
 } // namespace ybotln

@@ -5,27 +5,30 @@
 namespace ybotln
 {
 
-TaskThread::TaskThread(std::string name) : task_name{task_name}
+Task::Task(std::string name) : task_name{name} {}
+
+std::string Task::get_name() const
 {
+    return task_name;
 }
 
-std::string TaskThread::get_name() const
+std::string Task::log_name() const
 {
     std::stringstream id;
     id << task_thread.get_id();
-    if (task_name.empty())
-    {
-        return std::format("[{}]", id.str());
-    }
     return std::format("\"{}\" [{}]", task_name, id.str());
 }
 
-void TaskThread::task_dec()
+void Task::set_task_poll(TaskPool *n_pool)
+{
+    task_pool = n_pool;
+}
+
+void Task::task_dec()
 {
     running = true;
     stop_flag = false;
-    LOGGER_STREAM(MSG_LVL::INFO,
-                  "The task " << get_name() << " started...");
+    LOGGER_STREAM(MSG_LVL::INFO, "The task " << get_name() << " started...");
     try
     {
         task();
@@ -33,49 +36,156 @@ void TaskThread::task_dec()
     catch (const std::exception &e)
     {
         LOGGER_STREAM(MSG_LVL::ERROR,
-                      "The task " << get_name()
-                                << " terminated with exception: " << e.what());
+                      "The task " << get_name() << " terminated with exception: " << e.what());
     }
-    LOGGER_STREAM(MSG_LVL::INFO,
-                  "The task " << get_name() << " completed");
+    LOGGER_STREAM(MSG_LVL::INFO, "The task " << get_name() << " completed");
     running = false;
 }
 
-void TaskThread::start()
+void Task::start()
 {
     if (running)
     {
-        LOGGER_STREAM(MSG_LVL::WARN,
-                      "The task " << get_name() << " is already running");
+        LOGGER_STREAM(MSG_LVL::DEBUG, "The task " << get_name() << " is already running");
         return;
     }
-    task_thread = std::thread{&TaskThread::task_dec, this};
+    task_thread = std::thread{&Task::task_dec, this};
 }
 
-void TaskThread::stop()
+void Task::stop()
 {
     if (!running)
     {
-        LOGGER_STREAM(MSG_LVL::WARN, "The task is not running");
+        LOGGER_STREAM(MSG_LVL::DEBUG, "The task is not running");
         return;
     }
     stop_flag = true;
 }
 
-void TaskThread::wait()
+void Task::join()
 {
     if (!running)
     {
-        LOGGER_STREAM(MSG_LVL::WARN, "The task is not running");
+        LOGGER_STREAM(MSG_LVL::DEBUG, "The task is not running");
         return;
     }
     task_thread.join();
 }
 
-TaskThread::~TaskThread()
+Task::~Task()
 {
     stop();
-    wait();
+    join();
+}
+
+void TaskPool::start(std::string name)
+{
+    std::lock_guard<std::mutex> lock(tasks_lock);
+    try
+    {
+        tasks.at(name).first->start();
+    }
+    catch (const std::out_of_range &e)
+    {
+        LOGGER_STREAM(MSG_LVL::WARN, "Attempt to access a non-existent task: " << name);
+    }
+}
+
+void TaskPool::stop(std::string name)
+{
+    std::lock_guard<std::mutex> lock(tasks_lock);
+    try
+    {
+        tasks.at(name).first->stop();
+    }
+    catch (const std::out_of_range &e)
+    {
+        LOGGER_STREAM(MSG_LVL::WARN, "Attempt to access a non-existent task: " << name);
+    }
+}
+
+void TaskPool::start_all()
+{
+    std::lock_guard<std::mutex> lock(tasks_lock);
+    for (auto const &[key, val] : tasks)
+    {
+        val.first->start();
+    }
+}
+
+void TaskPool::stop_all()
+{
+    std::lock_guard<std::mutex> lock(tasks_lock);
+    for (auto const &[key, val] : tasks)
+    {
+        val.first->stop();
+    }
+}
+
+void TaskPool::add_task(std::unique_ptr<Task> task)
+{
+    std::lock_guard<std::mutex> lock(tasks_lock);
+    std::string name = task->get_name();
+    if (tasks.contains(name))
+    {
+        LOGGER_STREAM(MSG_LVL::ERROR, "This thread already exists! The task was not added");
+        return;
+    }
+    task->set_task_poll(this);
+    tasks[name].first = std::move(task);
+}
+
+void TaskPool::add_command(std::string name, std::shared_ptr<Command> command)
+{
+    std::lock_guard<std::mutex> lock(tasks_lock);
+    try
+    {
+        tasks.at(name).second.push(command);
+    }
+    catch (const std::out_of_range &e)
+    {
+        LOGGER_STREAM(MSG_LVL::WARN, "Attempt to access a non-existent task: " << name);
+    }
+}
+
+std::queue<std::shared_ptr<Command>> TaskPool::get_commands(std::string name)
+{
+    std::lock_guard<std::mutex> lock(tasks_lock);
+    std::queue<std::shared_ptr<Command>> empty;
+    try
+    {
+        std::swap(tasks.at(name).second, empty);
+    }
+    catch (const std::out_of_range &e)
+    {
+        LOGGER_STREAM(MSG_LVL::WARN, "Attempt to access a non-existent task: " << name);
+    }
+    return empty;
+}
+
+void Task::emit_command(std::string name, std::shared_ptr<Command> command)
+{
+    if (task_pool == nullptr)
+    {
+        LOGGER_STREAM(MSG_LVL::WARN, "The task does not belong to the pool. Command not called.");
+        return;
+    }
+    task_pool->add_command(name, command);
+}
+
+void Task::process_commands()
+{
+    if (task_pool == nullptr)
+    {
+        LOGGER_STREAM(MSG_LVL::WARN, "The task does not belong to the pool. Command not called.");
+        return;
+    }
+    auto task_queue = task_pool->get_commands(task_name);
+    while (!task_queue.empty())
+    {
+        task_queue.front()->execute(*this);
+        task_queue.pop();
+    }
 }
 
 } // namespace ybotln

@@ -28,14 +28,13 @@ enum class MSG_LVL : uint8_t
     FATAL
 };
 
-class Logger : public IParametersObserver
+class Logger
 {
   public:
     static Logger &get_logger();
     void operator()(const MSG_LVL &lvl, const std::string &str);
     void set_debug(const bool &n_debug);
     void set_save(const bool &n_save, const std::string n_save_path = "");
-    void handle_event(const std::string name) override;
 
   private:
     Logger();

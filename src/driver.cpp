@@ -4,68 +4,46 @@
 namespace ybotln
 {
 
-Driver::Driver()
-    : myYouBotBase("youbot-base", std::string(SOURCE_DIR) + "config/")
-{
-    init_parameters();
-    myYouBotBase.doJointCommutation();
-    stop();
-}
+DriverTask::DriverTask(std::string name) : Task(name) {}
 
-Driver::~Driver()
+void DriverTask::task()
 {
-    PARAMETERS.remove_observer(this);
-}
-
-void Driver::init_parameters()
-{
-    PARAMETERS.add_observer("max_leaner_vel",
-                            dynamic_cast<IParametersObserver *>(this));
-    PARAMETERS.init_observer(dynamic_cast<IParametersObserver *>(this));
-}
-
-void Driver::handle_event(const std::string name)
-{
-    if (name == "max_leaner_vel")
+    while (stop_flag)
     {
-        double n_max_leaner_vel = PARAMETERS.get<double>("max_leaner_vel");
-        if (n_max_leaner_vel < 0)
+        try
         {
-            LOGGER_STREAM(MSG_LVL::ERROR, "The maximum linear speed must be "
-                                          "greater than 0! Received value: "
-                                              << n_max_leaner_vel);
-            return;
+            LOGGER_STREAM(MSG_LVL::INFO, "Connecting to the youbot base...");
+            youbot::YouBotBase youbot_base("youbot-base", std::string(SOURCE_DIR) + "config/");
+            youbot_base.doJointCommutation();
         }
-        max_leaner_vel = n_max_leaner_vel;
-        return;
+        catch (const std::runtime_error &e)
+        {
+            LOGGER_STREAM(MSG_LVL::ERROR, e.what());
+        }
     }
 }
 
-void Driver::stop()
+void DriverTask::stop(youbot::YouBotBase &youbot_base)
 {
     youbot::JointVelocitySetpoint setVel;
     setVel.angularVelocity = 0 * radian_per_second;
-    myYouBotBase.getBaseJoint(1).setData(setVel);
-    myYouBotBase.getBaseJoint(2).setData(setVel);
-    myYouBotBase.getBaseJoint(3).setData(setVel);
-    myYouBotBase.getBaseJoint(4).setData(setVel);
+    youbot_base.getBaseJoint(1).setData(setVel);
+    youbot_base.getBaseJoint(2).setData(setVel);
+    youbot_base.getBaseJoint(3).setData(setVel);
+    youbot_base.getBaseJoint(4).setData(setVel);
 }
 
-void Driver::set_speed(const double &longitudinal_vel,
-                       const double &transversal_vel, const double &angular_vel)
+void DriverTask::set_speed(youbot::YouBotBase &youbot_base, const double &longitudinal_vel,
+                           const double &transversal_vel, const double &angular_vel)
 {
 
     quantity<si::velocity> longitudinalVelocity =
-        std::clamp(longitudinal_vel, -max_leaner_vel, max_leaner_vel) *
-        meter_per_second;
+        std::clamp(longitudinal_vel, -max_leaner_vel, max_leaner_vel) * meter_per_second;
     quantity<si::velocity> transversalVelocity =
-        std::clamp(transversal_vel, -max_leaner_vel, max_leaner_vel) *
-        meter_per_second;
-    quantity<si::angular_velocity> angularVelocity =
-        angular_vel * radian_per_second;
+        std::clamp(transversal_vel, -max_leaner_vel, max_leaner_vel) * meter_per_second;
+    quantity<si::angular_velocity> angularVelocity = angular_vel * radian_per_second;
 
-    myYouBotBase.setBaseVelocity(longitudinalVelocity, transversalVelocity,
-                                 angularVelocity);
+    youbot_base.setBaseVelocity(longitudinalVelocity, transversalVelocity, angularVelocity);
 }
 
 } // namespace ybotln

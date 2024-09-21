@@ -10,56 +10,41 @@
 namespace ybotln
 {
 
-class IParametersObserver
-{
-  public:
-    virtual void handle_event(const std::string name) = 0;
-    virtual ~IParametersObserver();
-};
-
 class ParameterServer
 {
   public:
-    static ParameterServer &get_parameters();
-    template <class T> const T &get(const std::string name);
-    template <class T> void set(const std::string name, const T value);
-    template <class T> bool exist(const std::string name);
-    void add_observer(const std::string name, IParametersObserver *ref);
-    void init_observer(IParametersObserver *observer);
-    void remove_observer(const std::string name);
-    void remove_observer(IParametersObserver *observer);
+    static ParameterServer &get_parameters()
+    {
+        static ParameterServer single_instance;
+        return single_instance;
+    };
+    template <class T>
+    const T &get(const std::string name)
+    {
+        return get_params_map<T>()[name];
+    }
+    template <class T>
+    void set(const std::string name, const T value)
+    {
+        get_params_map<T>()[name] = value;
+    }
+    template <class T>
+    bool exist(const std::string name)
+    {
+        return get_params_map<T>().contains(name);
+    }
 
   private:
-    ParameterServer();
+    ParameterServer() = default;
     ParameterServer(const ParameterServer &root) = delete;
     ParameterServer &operator=(const ParameterServer &) = delete;
-    template <class T> std::map<std::string, T> &get_params_map();
-    std::map<std::string, IParametersObserver *> observers;
-    void notify(const std::string name);
+    template <class T>
+    std::map<std::string, T> &get_params_map()
+    {
+        static std::map<std::string, T> parameters;
+        return parameters;
+    }
 };
-
-template <class T> const T &ParameterServer::get(const std::string name)
-{
-    return get_params_map<T>()[name];
-}
-
-template <class T>
-void ParameterServer::set(const std::string name, const T value)
-{
-    get_params_map<T>()[name] = value;
-    notify(name);
-}
-
-template <class T> bool ParameterServer::exist(const std::string name)
-{
-    return get_params_map<T>().contains(name);
-}
-
-template <class T> std::map<std::string, T> &ParameterServer::get_params_map()
-{
-    static std::map<std::string, T> parameters;
-    return parameters;
-}
 
 } // namespace ybotln
 
