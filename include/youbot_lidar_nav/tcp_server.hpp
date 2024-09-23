@@ -3,27 +3,31 @@
 
 #include <vector>
 
-#include "simple_socket/simple_socket.hpp"
 #include "protocol.hpp"
+#include "simple_socket/simple_socket.hpp"
+#include "utils/task_thread.hpp"
 
 namespace ybotln
 {
 
-class TcpServer
+class TcpServerTask : public Task
 {
   public:
-    TcpServer();
-    ~TcpServer() = default;
-
-    void start();
-    void stop();
+    TcpServerTask(std::string name);
+    ~TcpServerTask() = default;
+    void update_parameters();
 
   private:
-
+    void task() override;
+    void start_server();
     void receive();
+
     sockets::TCPServer server;
     std::vector<uint8_t> tx_buffer;
     std::vector<uint8_t> rx_buffer;
+    int tcp_server_port;
+    int tcp_server_timeout;
+
 };
 
 } // namespace ybotln

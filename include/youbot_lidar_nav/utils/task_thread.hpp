@@ -49,6 +49,8 @@ class Command
     virtual void execute(Task &task) = 0;
 };
 
+typedef std::pair<std::unique_ptr<Task>, std::queue<std::shared_ptr<Command>>> TaskHandler;
+
 class TaskPool
 {
   public:
@@ -59,15 +61,14 @@ class TaskPool
     void add_command(std::string name, std::shared_ptr<Command> command);
     std::queue<std::shared_ptr<Command>> get_commands(std::string name);
 
-    void start(std::string name = "");
-    void stop(std::string name = "");
+    void start(const std::string name);
+    void stop(const std::string name);
     void start_all();
     void stop_all();
 
   private:
     std::mutex tasks_lock;
-    std::map<std::string, std::pair<std::unique_ptr<Task>, std::queue<std::shared_ptr<Command>>>>
-        tasks;
+    std::map<std::string, TaskHandler> tasks;
 };
 
 } // namespace ybotln

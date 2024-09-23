@@ -1,37 +1,48 @@
 #include "youbot_lidar_nav/tcp_server.hpp"
 #include "youbot_lidar_nav/utils/logger.hpp"
+#include "youbot_lidar_nav/driver.hpp"
 
 namespace ybotln
 {
 
-TcpServer::TcpServer()
+TcpServerTask::TcpServerTask(std::string name) : Task(name)
 {
-    LOGGER_STREAM(MSG_LVL::INFO, "Launching the TSP server...");
-    server.set_socket("", PARAMETERS.get<int>("tcp_server_port"));
-    server.set_keepalive(1, 1, 1);
-    server.set_timeout(PARAMETERS.get<int>("tcp_server_timeout"));
-    server.socket_bind();
-    LOGGER_STREAM(MSG_LVL::INFO, "Tsp server running on port "
-                                     << PARAMETERS.get<int>("tcp_server_port"));
-
+    update_parameters();
     tx_buffer.resize(TX_MSG_SIZE, 0);
     rx_buffer.resize(RX_MSG_SIZE);
 }
 
-void TcpServer::start()
+void TcpServerTask::update_parameters()
 {
-    
+    tcp_server_port = PARAMETERS.get<int>("tcp_server/port");
+    tcp_server_timeout = PARAMETERS.get<int>("tcp_server/timeout");
 }
 
-void TcpServer::stop()
+void TcpServerTask::start_server()
 {
-
+    LOGGER_STREAM(MSG_LVL::INFO, "Launching the TSP server...");
+    server.set_socket("", tcp_server_port);
+    server.set_keepalive(1, 1, 1);
+    server.set_timeout(tcp_server_timeout);
+    server.socket_bind();
+    LOGGER_STREAM(MSG_LVL::INFO, "Tsp server running on port " << tcp_server_timeout);
 }
 
-void TcpServer::receive()
+void TcpServerTask::task()
 {
-    if (server.receive(reinterpret_cast<char *>(rx_buffer.data()),
-                       RX_MSG_SIZE) > 0)
+    start_server();
+
+    while (!stop_flag)
+    {
+        receive();
+
+        //process_commands();
+    }
+}
+
+void TcpServerTask::receive()
+{
+    if (server.receive(reinterpret_cast<char *>(rx_buffer.data()), RX_MSG_SIZE) >= 0)
     {
         LOGGER_STREAM(MSG_LVL::WARN, "Failed to receive message");
         return;
@@ -39,10 +50,11 @@ void TcpServer::receive()
 
     switch (rx_buffer[0])
     {
-    case static_cast<uint8_t>(DataId::GO_ROUTE):
-        // TODO
+    case static_cast<uint8_t>(DataId::GO_ROUTE): {
+        RouteStepMsg *step = reinterpret_cast<RouteStepMsg *>(&rx_buffer[2]);
+        
         break;
-
+    }
     default:
         LOGGER_STREAM(MSG_LVL::WARN, "Wrong data id");
         break;

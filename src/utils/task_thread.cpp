@@ -26,7 +26,6 @@ void Task::set_task_poll(TaskPool *n_pool)
 
 void Task::task_dec()
 {
-    //stop_flag = false;
     LOGGER_STREAM(MSG_LVL::INFO, "The task " << log_name() << " started...");
     try
     {
@@ -54,14 +53,7 @@ void Task::start()
 
 void Task::stop()
 {
-    if (!running)
-    {
-        LOGGER_STREAM(MSG_LVL::DEBUG, "The task " << log_name() << "is not running");
-        return;
-    }
     stop_flag = true;
-    join();
-    running = false;
 }
 
 void Task::join()
@@ -71,14 +63,16 @@ void Task::join()
         return;
     }
     task_thread.join();
+    running = false;
 }
 
 Task::~Task()
 {
     stop();
+    join();
 }
 
-void TaskPool::start(std::string name)
+void TaskPool::start(const std::string name)
 {
     std::lock_guard<std::mutex> lock(tasks_lock);
     try
@@ -91,7 +85,7 @@ void TaskPool::start(std::string name)
     }
 }
 
-void TaskPool::stop(std::string name)
+void TaskPool::stop(const std::string name)
 {
     std::lock_guard<std::mutex> lock(tasks_lock);
     try

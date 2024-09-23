@@ -23,8 +23,11 @@ void sigint_handler(int signal)
 
 void init_default_parameters()
 {
+    PARAMETERS.set<double>("logger/debug", false);
+    PARAMETERS.set<double>("logger/save_path", false);
+    PARAMETERS.set<std::string>("logger/save", "");
     PARAMETERS.set<double>("driver/max_leaner_vel", 0.5);
-    PARAMETERS.set<int>("driver/reconnect_delay", 1);
+    PARAMETERS.set<int>("driver/reconnect_delay", 1000);
     PARAMETERS.set<int>("tcp_server/port", 10000);
     PARAMETERS.set<int>("tcp_server/timeout", 500);
 }
@@ -40,7 +43,6 @@ void init_config()
     PARAMETERS.set("logger/debug", config["logger"]["debug"].as<bool>());
     PARAMETERS.set("logger/save_path", config["logger"]["save_path"].as<std::string>());
     PARAMETERS.set("logger/save", config["logger"]["save"].as<bool>());
-    Logger::get_logger().set_debug(true); // TODO update
     PARAMETERS.set("driver/max_leaner_vel", config["driver"]["max_leaner_vel"].as<double>());
     PARAMETERS.set("driver/reconnect_delay", config["driver"]["reconnect_delay"].as<int>());
     PARAMETERS.set("tcp_server/port", config["tcp_server"]["port"].as<int>());
@@ -70,10 +72,15 @@ int main()
         LOGGER_STREAM(MSG_LVL::ERROR, "Failed to load parameters! " << e.msg);
     }
 
+    Logger::get_logger().update_parameters();
+
     TaskPool task_pool;
 
-    auto driver_task = std::make_unique<DriverTask>("driver_task");
+    auto driver_task = std::make_unique<DriverTask>("driver");
     task_pool.add_task(std::move(driver_task));
+
+    auto tcp_server_task = std::make_unique<TcpServerTask>("tcp_server");
+    task_pool.add_task(std::move(tcp_server_task));
 
     task_pool.start_all();
 

@@ -3,6 +3,7 @@
 #include <string>
 
 #include "youbot_lidar_nav/utils/logger.hpp"
+#include "youbot_lidar_nav/utils/parameter_server.hpp"
 
 #define RESET "\033[0m"
 #define BLACK "\033[30m"   /* Black */
@@ -24,6 +25,13 @@ Logger &Logger::get_logger()
 }
 
 Logger::Logger() {}
+
+void Logger::update_parameters()
+{
+    debug = PARAMETERS.get<bool>("logger/debug");
+    save_path = PARAMETERS.get<std::string>("logger/save_path");
+    save = PARAMETERS.get<bool>("logger/save");
+}
 
 void Logger::operator()(const MSG_LVL &lvl, const std::string &str)
 {
@@ -59,16 +67,6 @@ std::string Logger::get_time()
     oss << std::put_time(&bt, "%H:%M:%S");
     oss << '.' << std::setfill('0') << std::setw(3) << ms.count();
     return oss.str();
-}
-
-void Logger::set_debug(const bool &n_debug)
-{
-    debug = n_debug;
-}
-
-void Logger::set_save(const bool &n_save, const std::string n_save_path)
-{
-    // TODO
 }
 
 } // namespace ybotln
