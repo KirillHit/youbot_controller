@@ -7,6 +7,7 @@ namespace ybotln
 Driver::Driver() : youbot_base("youbot-base", std::string(SOURCE_DIR) + "config/")
 {
     update_parameters();
+    youbot_base.doJointCommutation();
 }
 
 void Driver::update_parameters()
