@@ -5,7 +5,15 @@
 namespace ybotln
 {
 
-Task::Task(std::string name) : task_name{name} {}
+/**************************** Task class ****************************/
+
+Task::Task(std::string name) : task_name{name}, command_smph{0} {}
+
+Task::~Task()
+{
+    stop();
+    join();
+}
 
 std::string Task::get_name() const
 {
@@ -66,95 +74,11 @@ void Task::join()
     running = false;
 }
 
-Task::~Task()
+void Task::add_command(std::shared_ptr<Command> command)
 {
-    stop();
-    join();
-}
-
-void TaskPool::start(const std::string name)
-{
-    std::lock_guard<std::mutex> lock(tasks_lock);
-    try
-    {
-        tasks.at(name).first->start();
-    }
-    catch (const std::out_of_range &e)
-    {
-        LOGGER_STREAM(MSG_LVL::WARN, "Attempt to access a non-existent task: " << name);
-    }
-}
-
-void TaskPool::stop(const std::string name)
-{
-    std::lock_guard<std::mutex> lock(tasks_lock);
-    try
-    {
-        tasks.at(name).first->stop();
-    }
-    catch (const std::out_of_range &e)
-    {
-        LOGGER_STREAM(MSG_LVL::WARN, "Attempt to access a non-existent task: " << name);
-    }
-}
-
-void TaskPool::start_all()
-{
-    std::lock_guard<std::mutex> lock(tasks_lock);
-    for (auto const &[key, val] : tasks)
-    {
-        val.first->start();
-    }
-}
-
-void TaskPool::stop_all()
-{
-    std::lock_guard<std::mutex> lock(tasks_lock);
-    for (auto const &[key, val] : tasks)
-    {
-        val.first->stop();
-    }
-}
-
-void TaskPool::add_task(std::unique_ptr<Task> &&task)
-{
-    std::lock_guard<std::mutex> lock(tasks_lock);
-    std::string name = task->get_name();
-    if (tasks.contains(name))
-    {
-        LOGGER_STREAM(MSG_LVL::ERROR, "This thread already exists! The task was not added");
-        return;
-    }
-    task->set_task_poll(this);
-    tasks[name].first = std::move(task);
-}
-
-void TaskPool::add_command(std::string name, std::shared_ptr<Command> command)
-{
-    std::lock_guard<std::mutex> lock(tasks_lock);
-    try
-    {
-        tasks.at(name).second.push(command);
-    }
-    catch (const std::out_of_range &e)
-    {
-        LOGGER_STREAM(MSG_LVL::WARN, "Attempt to access a non-existent task: " << name);
-    }
-}
-
-std::queue<std::shared_ptr<Command>> TaskPool::get_commands(std::string name)
-{
-    std::lock_guard<std::mutex> lock(tasks_lock);
-    std::queue<std::shared_ptr<Command>> empty;
-    try
-    {
-        std::swap(tasks.at(name).second, empty);
-    }
-    catch (const std::out_of_range &e)
-    {
-        LOGGER_STREAM(MSG_LVL::WARN, "Attempt to access a non-existent task: " << name);
-    }
-    return empty;
+    std::lock_guard<std::mutex> lock(cmd_lock);
+    commands.push(command);
+    command_smph.release();
 }
 
 void Task::emit_command(std::string name, std::shared_ptr<Command> command)
@@ -164,22 +88,117 @@ void Task::emit_command(std::string name, std::shared_ptr<Command> command)
         LOGGER_STREAM(MSG_LVL::WARN, "The task does not belong to the pool. Command not called.");
         return;
     }
-    task_pool->add_command(name, command);
+    task_pool->add_command_to(name, command);
+}
+
+void Task::wait_process_commands()
+{
+    command_smph.acquire();
+    process_commands();
+}
+
+bool Task::try_process_commands()
+{
+    if (command_smph.try_acquire())
+    {
+        process_commands();
+        return true;
+    }
+    return false;
 }
 
 void Task::process_commands()
 {
-    if (task_pool == nullptr)
+    std::unique_lock<std::mutex> lock(cmd_lock);
+    std::queue<std::shared_ptr<Command>> exe_cmds;
+    std::swap(commands, exe_cmds);
+    lock.unlock();
+    while (!exe_cmds.empty())
     {
-        LOGGER_STREAM(MSG_LVL::WARN, "The task does not belong to the pool. Command not called.");
+        exe_cmds.front()->execute(*this);
+        exe_cmds.pop();
+    }
+}
+
+bool Task::try_process_commands(const std::chrono::milliseconds rel_time)
+{
+    if (command_smph.try_acquire_for(rel_time))
+    {
+        process_commands();
+        return true;
+    }
+    return false;
+}
+
+/**************************** TaskPool class ****************************/
+
+void TaskPool::start(const std::string name)
+{
+    std::shared_lock<std::shared_mutex> lock(tasks_lock);
+    if (!tasks.contains("name"))
+    {
+        LOGGER_STREAM(MSG_LVL::WARN, "Attempt to access a non-existent task: " << name);
         return;
     }
-    auto task_queue = task_pool->get_commands(task_name);
-    while (!task_queue.empty())
+    tasks.at(name)->start();
+}
+
+void TaskPool::stop(const std::string name)
+{
+    std::shared_lock<std::shared_mutex> lock(tasks_lock);
+    if (!tasks.contains("name"))
     {
-        task_queue.front()->execute(*this);
-        task_queue.pop();
+        LOGGER_STREAM(MSG_LVL::WARN, "Attempt to access a non-existent task: " << name);
+        return;
     }
+    tasks.at(name)->stop();
+    tasks.at(name)->join();
+}
+
+void TaskPool::start_all()
+{
+    std::shared_lock<std::shared_mutex> lock(tasks_lock);
+    for (auto const &[key, val] : tasks)
+    {
+        val->start();
+    }
+}
+
+void TaskPool::stop_all()
+{
+    std::shared_lock<std::shared_mutex> lock(tasks_lock);
+    for (auto const &[key, val] : tasks)
+    {
+        val->stop();
+    }
+    for (auto const &[key, val] : tasks)
+    {
+        val->join();
+    }
+}
+
+void TaskPool::add_task(std::unique_ptr<Task> &&task)
+{
+    std::unique_lock<std::shared_mutex> lock(tasks_lock);
+    std::string name = task->get_name();
+    if (tasks.contains(name))
+    {
+        LOGGER_STREAM(MSG_LVL::ERROR, "This thread already exists! The task was not added");
+        return;
+    }
+    task->set_task_poll(this);
+    tasks[name] = std::move(task);
+}
+
+void TaskPool::add_command_to(std::string name, std::shared_ptr<Command> command)
+{
+    std::shared_lock<std::shared_mutex> lock(tasks_lock);
+    if (!tasks.contains("name"))
+    {
+        LOGGER_STREAM(MSG_LVL::WARN, "Attempt to access a non-existent task: " << name);
+        return;
+    }
+    tasks.at(name)->add_command(command);
 }
 
 } // namespace ybotln

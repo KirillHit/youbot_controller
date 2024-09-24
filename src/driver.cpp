@@ -43,7 +43,7 @@ void Driver::set_speed(const double &longitudinal_vel, const double &transversal
     youbot_base.setBaseVelocity(longitudinalVelocity, transversalVelocity, angularVelocity);
 }
 
-DriverTask::DriverTask(std::string name) : Task(name) 
+DriverTask::DriverTask(std::string name) : Task(name)
 {
     update_parameters();
 }
@@ -57,12 +57,10 @@ void DriverTask::task()
 {
     while (!stop_flag)
     {
-        process_commands();
         try
         {
             LOGGER_STREAM(MSG_LVL::INFO, "Connecting to the youbot base...");
             driver = std::make_unique<Driver>();
-            process_commands();
         }
         catch (const std::runtime_error &e)
         {
@@ -72,14 +70,14 @@ void DriverTask::task()
     }
 }
 
-void DriverTask::set_route(std::queue<RouteStep>&& n_route)
+void DriverTask::set_route(std::queue<RouteStep> &&n_route)
 {
     route = std::move(n_route);
 }
 
-void RouteCommand::execute(Task &task) 
+void RouteCommand::execute(Task &task)
 {
-    DriverTask& driver_task = dynamic_cast<DriverTask&>(task);
+    DriverTask &driver_task = dynamic_cast<DriverTask &>(task);
     driver_task.set_route(std::move(new_route));
 }
 
