@@ -62,6 +62,7 @@ void Task::start()
 void Task::stop()
 {
     stop_flag = true;
+    command_smph.release();
 }
 
 void Task::join()
@@ -107,6 +108,16 @@ bool Task::try_process_commands()
     return false;
 }
 
+bool Task::try_process_commands(const std::chrono::milliseconds rel_time)
+{
+    if (command_smph.try_acquire_for(rel_time))
+    {
+        process_commands();
+        return true;
+    }
+    return false;
+}
+
 void Task::process_commands()
 {
     std::unique_lock<std::mutex> lock(cmd_lock);
@@ -118,16 +129,6 @@ void Task::process_commands()
         exe_cmds.front()->execute(*this);
         exe_cmds.pop();
     }
-}
-
-bool Task::try_process_commands(const std::chrono::milliseconds rel_time)
-{
-    if (command_smph.try_acquire_for(rel_time))
-    {
-        process_commands();
-        return true;
-    }
-    return false;
 }
 
 /**************************** TaskPool class ****************************/
