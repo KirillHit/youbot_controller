@@ -94,12 +94,20 @@ void Task::emit_command(std::string name, std::shared_ptr<Command> command)
 
 void Task::wait_process_commands()
 {
+    if (stop_flag)
+    {
+        return;
+    }
     command_smph.acquire();
     process_commands();
 }
 
 bool Task::try_process_commands()
 {
+    if (stop_flag)
+    {
+        return false;
+    }
     if (command_smph.try_acquire())
     {
         process_commands();
@@ -110,6 +118,10 @@ bool Task::try_process_commands()
 
 bool Task::try_process_commands(const std::chrono::milliseconds rel_time)
 {
+    if (stop_flag)
+    {
+        return false;
+    }
     if (command_smph.try_acquire_for(rel_time))
     {
         process_commands();

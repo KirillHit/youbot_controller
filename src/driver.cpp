@@ -66,6 +66,7 @@ void DriverTask::task()
         {
             LOGGER_STREAM(MSG_LVL::ERROR, e.what());
         }
+        wait_process_commands();
         std::this_thread::sleep_for(std::chrono::milliseconds(reconnect_delay));
     }
 }
