@@ -4,7 +4,7 @@ logger:
   save_path: ""         # default: source_dir/log/<timestamp>.log
 driver:
   max_leaner_vel: 0.5   # m/s
-  reconnect_delay: 1000 # ms
+  reconnect_delay: 5000 # ms
 tcp_server:
   port: 10000
   timeout: 2000          # ms

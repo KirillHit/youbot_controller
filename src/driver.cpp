@@ -61,19 +61,38 @@ void DriverTask::task()
         {
             LOGGER_STREAM(MSG_LVL::INFO, "Connecting to the youbot base...");
             driver = std::make_unique<Driver>();
+            spin_route();
         }
         catch (const std::runtime_error &e)
         {
             LOGGER_STREAM(MSG_LVL::ERROR, e.what());
         }
-        wait_process_commands();
         std::this_thread::sleep_for(std::chrono::milliseconds(reconnect_delay));
+    }
+}
+
+void DriverTask::spin_route()
+{
+    while (!stop_flag)
+    {
+        if (!route.empty())
+        {
+            ybotln::RouteStep task = route.front();
+            route.pop();
+            driver->set_speed(task.longitudinal_vel, task.transversal_vel, task.angular_vel);
+            try_process_commands(std::chrono::milliseconds(task.duration));
+        }
+        else
+        {
+            driver->set_stop();
+            wait_process_commands();
+        }
     }
 }
 
 void DriverTask::set_route(std::queue<RouteStep> &&n_route)
 {
-    route = std::move(n_route);
+    route = n_route;
 }
 
 void RouteCommand::execute(Task &task)

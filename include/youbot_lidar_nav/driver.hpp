@@ -40,10 +40,11 @@ class DriverTask : public Task
     DriverTask(std::string name);
     ~DriverTask() = default;
     void update_parameters();
-    void set_route(std::queue<RouteStep>&& n_route);
+    void set_route(std::queue<RouteStep> &&n_route);
 
   private:
     void task() override;
+    void spin_route();
 
     std::unique_ptr<Driver> driver;
     std::queue<RouteStep> route;
