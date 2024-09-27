@@ -25,33 +25,12 @@ void MainWindow::sliderInit()
 {
     ui->labelLinVel->setText(QString::number(ui->sliderLinVel->value() / 100.0, 'f', 2));
     ui->lableAngVel->setText(QString::number(ui->sliderAngVel->value() / 100.0, 'f', 2));
-    ui->labelAxis1->setText(QString::number(ui->sliderAxis1->value() / 100.0, 'f', 2));
-    ui->labelAxis2->setText(QString::number(ui->sliderAxis2->value() / 100.0, 'f', 2));
-    ui->labelAxis3->setText(QString::number(ui->sliderAxis3->value() / 100.0, 'f', 2));
-    ui->labelAxis4->setText(QString::number(ui->sliderAxis4->value() / 100.0, 'f', 2));
-    ui->labelAxis5->setText(QString::number(ui->sliderAxis5->value() / 100.0, 'f', 2));
-
-    txMsg.axis[0] = ui->sliderAxis1->value();
-    txMsg.axis[1] = ui->sliderAxis2->value();
-    txMsg.axis[2] = ui->sliderAxis3->value();
-    txMsg.axis[3] = ui->sliderAxis4->value();
-    txMsg.axis[4] = ui->sliderAxis5->value();
 
     connect(ui->sliderLinVel, &QAbstractSlider::valueChanged, this, &MainWindow::sliderHandle);
     connect(ui->sliderAngVel, &QAbstractSlider::valueChanged, this, &MainWindow::sliderHandle);
-    connect(ui->sliderAxis1, &QAbstractSlider::valueChanged, this, &MainWindow::sliderHandle);
-    connect(ui->sliderAxis2, &QAbstractSlider::valueChanged, this, &MainWindow::sliderHandle);
-    connect(ui->sliderAxis3, &QAbstractSlider::valueChanged, this, &MainWindow::sliderHandle);
-    connect(ui->sliderAxis4, &QAbstractSlider::valueChanged, this, &MainWindow::sliderHandle);
-    connect(ui->sliderAxis5, &QAbstractSlider::valueChanged, this, &MainWindow::sliderHandle);
 
     connect(ui->sliderLinVel, &QAbstractSlider::sliderReleased, this, &MainWindow::sendTcpComand);
     connect(ui->sliderAngVel, &QAbstractSlider::sliderReleased, this, &MainWindow::sendTcpComand);
-    connect(ui->sliderAxis1, &QAbstractSlider::sliderReleased, this, &MainWindow::sendTcpComand);
-    connect(ui->sliderAxis2, &QAbstractSlider::sliderReleased, this, &MainWindow::sendTcpComand);
-    connect(ui->sliderAxis3, &QAbstractSlider::sliderReleased, this, &MainWindow::sendTcpComand);
-    connect(ui->sliderAxis4, &QAbstractSlider::sliderReleased, this, &MainWindow::sendTcpComand);
-    connect(ui->sliderAxis5, &QAbstractSlider::sliderReleased, this, &MainWindow::sendTcpComand);
 }
 
 
@@ -63,21 +42,6 @@ void MainWindow::sliderHandle(int value)
         ui->labelLinVel->setText(QString::number(value / 100.0, 'f', 2));
     } else if (pObject == ui->sliderAngVel) {
         ui->lableAngVel->setText(QString::number(value / 100.0, 'f', 2));
-    } else if (pObject == ui->sliderAxis1) {
-        ui->labelAxis1->setText(QString::number(value / 100.0, 'f', 2));
-        txMsg.axis[0] = value;
-    } else if (pObject == ui->sliderAxis2) {
-        ui->labelAxis2->setText(QString::number(value / 100.0, 'f', 2));
-        txMsg.axis[1] = value;
-    } else if (pObject == ui->sliderAxis3) {
-        ui->labelAxis3->setText(QString::number(value / 100.0, 'f', 2));
-        txMsg.axis[2] = value;
-    } else if (pObject == ui->sliderAxis4) {
-        ui->labelAxis4->setText(QString::number(value / 100.0, 'f', 2));
-        txMsg.axis[3] = value;
-    } else if (pObject == ui->sliderAxis5) {
-        ui->labelAxis5->setText(QString::number(value / 100.0, 'f', 2));
-        txMsg.axis[4] = value;
     }
 }
 
@@ -156,31 +120,28 @@ void MainWindow::buttonInit()
     connect(ui->butDisconnect, &QPushButton::pressed, this, &MainWindow::disconnect);
     
     connect(ui->butLeftForward, &QPushButton::pressed, this, &MainWindow::buttonHandle);
-    connect(ui->butLeftForward, &QPushButton::released, this, &MainWindow::buttonHandle);
     connect(ui->butLeft, &QPushButton::pressed, this, &MainWindow::buttonHandle);
-    connect(ui->butLeft, &QPushButton::released, this, &MainWindow::buttonHandle);
     connect(ui->butLeftBack, &QPushButton::pressed, this, &MainWindow::buttonHandle);
-    connect(ui->butLeftBack, &QPushButton::released, this, &MainWindow::buttonHandle);
     connect(ui->butForward, &QPushButton::pressed, this, &MainWindow::buttonHandle);
-    connect(ui->butForward, &QPushButton::released, this, &MainWindow::buttonHandle);
     connect(ui->butStop, &QPushButton::pressed, this, &MainWindow::buttonHandle);
-    connect(ui->butStop, &QPushButton::released, this, &MainWindow::buttonHandle);
     connect(ui->butBack, &QPushButton::pressed, this, &MainWindow::buttonHandle);
-    connect(ui->butBack, &QPushButton::released, this, &MainWindow::buttonHandle);
     connect(ui->butRightForward, &QPushButton::pressed, this, &MainWindow::buttonHandle);
-    connect(ui->butRightForward, &QPushButton::released, this, &MainWindow::buttonHandle);
     connect(ui->butRight, &QPushButton::pressed, this, &MainWindow::buttonHandle);
-    connect(ui->butRight, &QPushButton::released, this, &MainWindow::buttonHandle);
     connect(ui->butRightBack, &QPushButton::pressed, this, &MainWindow::buttonHandle);
-    connect(ui->butRightBack, &QPushButton::released, this, &MainWindow::buttonHandle);
     connect(ui->butRotLeft, &QPushButton::pressed, this, &MainWindow::buttonHandle);
-    connect(ui->butRotLeft, &QPushButton::released, this, &MainWindow::buttonHandle);
     connect(ui->butRotRight, &QPushButton::pressed, this, &MainWindow::buttonHandle);
+
+    connect(ui->butLeftForward, &QPushButton::released, this, &MainWindow::buttonHandle);
+    connect(ui->butLeft, &QPushButton::released, this, &MainWindow::buttonHandle);
+    connect(ui->butLeftBack, &QPushButton::released, this, &MainWindow::buttonHandle);
+    connect(ui->butForward, &QPushButton::released, this, &MainWindow::buttonHandle);
+    connect(ui->butStop, &QPushButton::released, this, &MainWindow::buttonHandle);
+    connect(ui->butBack, &QPushButton::released, this, &MainWindow::buttonHandle);
+    connect(ui->butRightForward, &QPushButton::released, this, &MainWindow::buttonHandle);
+    connect(ui->butRight, &QPushButton::released, this, &MainWindow::buttonHandle);
+    connect(ui->butRightBack, &QPushButton::released, this, &MainWindow::buttonHandle);
+    connect(ui->butRotLeft, &QPushButton::released, this, &MainWindow::buttonHandle);
     connect(ui->butRotRight, &QPushButton::released, this, &MainWindow::buttonHandle);
-    connect(ui->butCompress, &QPushButton::pressed, this, &MainWindow::buttonHandle);
-    connect(ui->butCompress, &QPushButton::released, this, &MainWindow::buttonHandle);
-    connect(ui->butOpen, &QPushButton::pressed, this, &MainWindow::buttonHandle);
-    connect(ui->butOpen, &QPushButton::released, this, &MainWindow::buttonHandle);
 
     connect(ui->butRandomMove, &QPushButton::pressed, this, &MainWindow::buttonRandHandle);
     connect(ui->butRandomMove, &QPushButton::released, this, &MainWindow::buttonHandle);
@@ -234,56 +195,13 @@ void MainWindow::buttonHandle()
             * (static_cast<int>(ui->butRotLeft->isDown()) - static_cast<int>(ui->butRotRight->isDown()));
     }
 
-    if (ui->butOpen->isDown()) {
-        txMsg.grip_cmd = GripControl::OPEN;
-    } else if (ui->butCompress->isDown()) {
-        txMsg.grip_cmd = GripControl::COMPRESS;
-    } else {
-        txMsg.grip_cmd = GripControl::WAIT;
-    }
-
     sendTcp();
     tcpResendTimer->start(resendTime);
 }
 
 
-bool MainWindow::sliderKeyHandle(QKeyEvent *keyEvent)
-{
-    int controlModifier = (keyEvent->modifiers() == Qt::ControlModifier) ? -1 : 1;
-
-    switch (keyEvent->key())
-    {
-    case Qt::Key_1:
-        ui->sliderAxis1-> setValue(ui->sliderAxis1->value() + sliderShortkeyStep * controlModifier);
-        break;
-    case Qt::Key_2:
-        ui->sliderAxis2-> setValue(ui->sliderAxis2->value() + sliderShortkeyStep * controlModifier);
-        break;
-    case Qt::Key_3:
-        ui->sliderAxis3-> setValue(ui->sliderAxis3->value() + sliderShortkeyStep * controlModifier);
-        break;
-    case Qt::Key_4:
-        ui->sliderAxis4-> setValue(ui->sliderAxis4->value() + sliderShortkeyStep * controlModifier);
-        break;
-    case Qt::Key_5:
-        ui->sliderAxis5-> setValue(ui->sliderAxis5->value() + sliderShortkeyStep * controlModifier);
-        break;
-    default:
-        return false;
-        break;
-    }
-
-    return true;
-}
-
-
 void MainWindow::keyPressEvent(QKeyEvent *keyEvent)
 {  
-    if (sliderKeyHandle(keyEvent)) {
-        keyEvent->accept();
-        return;
-    }
-    
     if(keyEvent->isAutoRepeat()) {
         keyEvent->accept();
         return;
@@ -326,16 +244,6 @@ void MainWindow::keyPressEvent(QKeyEvent *keyEvent)
         break;
     case Qt::Key_P:
         pressBut(ui->butRandomMove);
-        break;
-    case Qt::Key_R:
-        if (!ui->butOpen->isDown()) {
-            pressBut(ui->butCompress);
-        }
-        break;
-    case Qt::Key_F:
-        if (!ui->butCompress->isDown()) {
-            pressBut(ui->butOpen);
-        }
         break;
 
     default:
@@ -390,12 +298,6 @@ void MainWindow::keyReleaseEvent(QKeyEvent *keyEvent)
         break;
     case Qt::Key_P:
         releasBut(ui->butRandomMove);
-        break;
-    case Qt::Key_R:
-        releasBut(ui->butCompress);
-        break;
-    case Qt::Key_F:
-        releasBut(ui->butOpen);
         break;
     case Qt::Key_1: case Qt::Key_2: case Qt::Key_3: case Qt::Key_4: case Qt::Key_5:
         sendTcpComand();
