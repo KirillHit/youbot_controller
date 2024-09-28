@@ -2,9 +2,7 @@
 #include "./ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
-    , tcpSocket(new QTcpSocket(this))
+    : QMainWindow(parent), ui(new Ui::MainWindow), tcpSocket(new QTcpSocket(this))
 {
     ui->setupUi(this);
 
@@ -12,14 +10,16 @@ MainWindow::MainWindow(QWidget *parent)
     sliderInit();
     uiValidator();
 
+    txBuffer.resize(TX_MSG_SIZE, 0);
+    rxBuffer.resize(RX_MSG_SIZE);
+
     tcpResendTimer = new QTimer(this);
-    connect(tcpResendTimer, &QTimer::timeout, this, &MainWindow::sendTcp);
+    connect(tcpResendTimer, &QTimer::timeout, this, &MainWindow::buttonHandle);
     tcpResendTimer->start(resendTime);
 
     connect(tcpSocket, &QAbstractSocket::errorOccurred, this, &MainWindow::displayNetError);
     connect(tcpSocket, &QAbstractSocket::disconnected, this, &MainWindow::disconnectedHandle);
 }
-
 
 void MainWindow::sliderInit()
 {
@@ -28,30 +28,21 @@ void MainWindow::sliderInit()
 
     connect(ui->sliderLinVel, &QAbstractSlider::valueChanged, this, &MainWindow::sliderHandle);
     connect(ui->sliderAngVel, &QAbstractSlider::valueChanged, this, &MainWindow::sliderHandle);
-
-    connect(ui->sliderLinVel, &QAbstractSlider::sliderReleased, this, &MainWindow::sendTcpComand);
-    connect(ui->sliderAngVel, &QAbstractSlider::sliderReleased, this, &MainWindow::sendTcpComand);
 }
-
 
 void MainWindow::sliderHandle(int value)
 {
-    QObject* pObject = sender();
-    
-    if (pObject == ui->sliderLinVel) {
+    QObject *pObject = sender();
+
+    if (pObject == ui->sliderLinVel)
+    {
         ui->labelLinVel->setText(QString::number(value / 100.0, 'f', 2));
-    } else if (pObject == ui->sliderAngVel) {
+    }
+    else if (pObject == ui->sliderAngVel)
+    {
         ui->lableAngVel->setText(QString::number(value / 100.0, 'f', 2));
     }
 }
-
-
-void MainWindow::sendTcpComand()
-{   
-    sendTcp();
-    tcpResendTimer->start(resendTime);
-}
-
 
 void MainWindow::requestNewConnection()
 {
@@ -60,27 +51,53 @@ void MainWindow::requestNewConnection()
     tcpSocket->connectToHost(ui->lineIp->text(), ui->linePort->text().toInt());
 }
 
-
 void MainWindow::disconnect()
 {
     tcpSocket->abort();
     ui->butConnect->setEnabled(true);
 }
 
-
-void MainWindow::sendTcp()
+void MainWindow::sendTcp(const size_t msg_size)
 {
-    if (tcpSocket->state() != QAbstractSocket::ConnectedState) {
+    if (tcpSocket->state() != QAbstractSocket::ConnectedState)
+    {
         return;
     }
-    
-    tcpSocket->write(reinterpret_cast<char*>(&txMsg), YOUBOT_MSG_SIZE);
+    tcpSocket->write(reinterpret_cast<char *>(txBuffer.data()), msg_size);
 }
 
+void MainWindow::sendRoute(const std::vector<RouteStep> &route_list)
+{
+    txBuffer[0] = static_cast<uint8_t>(DataId::GO_ROUTE);
+    RouteMsgHeader *route_header = reinterpret_cast<RouteMsgHeader *>(&txBuffer[1]);
+    RouteStepMsg *step_msg = reinterpret_cast<RouteStepMsg *>(&txBuffer[3]);
+    route_header->reset_route = 1;
+    size_t step_count = 0;
+    for (const auto &step : route_list)
+    {
+        step_msg->longitudinal_vel = static_cast<int16_t>(step.longitudinal_vel * 1000);
+        step_msg->transversal_vel = static_cast<int16_t>(step.transversal_vel * 1000);
+        step_msg->angular_vel = static_cast<int16_t>(step.angular_vel * 1000);
+        step_msg->duration = static_cast<int16_t>(step.duration);
+        ++step_msg;
+        ++step_count;
+        if (step_count >= MAX_ROUTE_STEPS)
+        {
+            route_header->step_count = MAX_ROUTE_STEPS;
+            sendTcp(MAX_ROUTE_STEPS);
+            route_header->reset_route = 0;
+            step_count = 0;
+        }
+    }
+    size_t msg_size = route_list.size() % MAX_ROUTE_STEPS;
+    route_header->step_count = static_cast<uint8_t>(msg_size);
+    sendTcp(msg_size);
+}
 
 void MainWindow::displayNetError(QAbstractSocket::SocketError socketError)
 {
-    switch (socketError) {
+    switch (socketError)
+    {
     case QAbstractSocket::RemoteHostClosedError:
         break;
     case QAbstractSocket::HostNotFoundError:
@@ -96,29 +113,24 @@ void MainWindow::displayNetError(QAbstractSocket::SocketError socketError)
                                     "settings are correct."));
         break;
     default:
-        QMessageBox::information(this, tr("Tcp Client"),
-                                 tr("The following error occurred: %1.")
-                                 .arg(tcpSocket->errorString()));
+        QMessageBox::information(
+            this, tr("Tcp Client"),
+            tr("The following error occurred: %1.").arg(tcpSocket->errorString()));
     }
 
     ui->butConnect->setEnabled(true);
 }
 
-
 void MainWindow::disconnectedHandle()
 {
-    /* QMessageBox::warning(this, tr("Tcp Client"),
-                                tr("Сonnection was lost.")); */
-
     ui->butConnect->setEnabled(true);
 }
-
 
 void MainWindow::buttonInit()
 {
     connect(ui->butConnect, &QPushButton::pressed, this, &MainWindow::requestNewConnection);
     connect(ui->butDisconnect, &QPushButton::pressed, this, &MainWindow::disconnect);
-    
+
     connect(ui->butLeftForward, &QPushButton::pressed, this, &MainWindow::buttonHandle);
     connect(ui->butLeft, &QPushButton::pressed, this, &MainWindow::buttonHandle);
     connect(ui->butLeftBack, &QPushButton::pressed, this, &MainWindow::buttonHandle);
@@ -142,67 +154,51 @@ void MainWindow::buttonInit()
     connect(ui->butRightBack, &QPushButton::released, this, &MainWindow::buttonHandle);
     connect(ui->butRotLeft, &QPushButton::released, this, &MainWindow::buttonHandle);
     connect(ui->butRotRight, &QPushButton::released, this, &MainWindow::buttonHandle);
-
-    connect(ui->butRandomMove, &QPushButton::pressed, this, &MainWindow::buttonRandHandle);
-    connect(ui->butRandomMove, &QPushButton::released, this, &MainWindow::buttonHandle);
 }
-
 
 void MainWindow::uiValidator()
 {
     QString IpRange = "(?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])";
-    QRegularExpression IpRegex ("^" + IpRange
-                               + "(\\." + IpRange + ")"
-                               + "(\\." + IpRange + ")"
-                               + "(\\." + IpRange + ")$");
+    QRegularExpression IpRegex("^" + IpRange + "(\\." + IpRange + ")" + "(\\." + IpRange + ")" +
+                               "(\\." + IpRange + ")$");
     QRegularExpressionValidator *ipValidator = new QRegularExpressionValidator(IpRegex, this);
     ui->lineIp->setValidator(ipValidator);
 
     ui->linePort->setValidator(new QIntValidator(1024, 65535, this));
 }
 
-
-void MainWindow::buttonRandHandle()
-{
-    int lin_vel = ui->sliderLinVel->value();
-    int and_vel = ui->sliderAngVel ->value();
-    
-    txMsg.x_vel = QRandomGenerator::global()->bounded(-lin_vel, lin_vel);
-    txMsg.y_vel = QRandomGenerator::global()->bounded(-lin_vel, lin_vel);
-    txMsg.ang_speed = QRandomGenerator::global()->bounded(-and_vel, and_vel);
-    
-    sendTcp();
-    tcpResendTimer->start(resendTime);
-}
-
-
 void MainWindow::buttonHandle()
 {
-    if (ui->butStop->isDown()) {
-        txMsg.x_vel = 0;
-        txMsg.y_vel = 0;
-        txMsg.ang_speed = 0;
-    } else {
-        txMsg.x_vel = ui->sliderLinVel->value() 
-        * (static_cast<int>(ui->butForward->isDown() || ui->butLeftForward->isDown() || ui->butRightForward->isDown())
-        - static_cast<int>(ui->butBack->isDown() || ui->butLeftBack->isDown() || ui->butRightBack->isDown()));
-        
-        txMsg.y_vel = ui->sliderLinVel->value()
-            * (static_cast<int>(ui->butLeft->isDown() || ui->butLeftBack->isDown() || ui->butLeftForward->isDown())
-            - static_cast<int>(ui->butRight->isDown() || ui->butRightBack->isDown() || ui->butRightForward->isDown()));
+    std::vector<RouteStep> route(1);
+    route[0].duration = routeResolution;
+    if (!ui->butStop->isDown())
+    {
+        route[0].longitudinal_vel =
+            ui->sliderLinVel->value() *
+            (static_cast<int>(ui->butForward->isDown() || ui->butLeftForward->isDown() ||
+                              ui->butRightForward->isDown()) -
+             static_cast<int>(ui->butBack->isDown() || ui->butLeftBack->isDown() ||
+                              ui->butRightBack->isDown()));
 
-        txMsg.ang_speed = ui->sliderAngVel->value()
-            * (static_cast<int>(ui->butRotLeft->isDown()) - static_cast<int>(ui->butRotRight->isDown()));
+        route[0].transversal_vel =
+            ui->sliderLinVel->value() *
+            (static_cast<int>(ui->butLeft->isDown() || ui->butLeftBack->isDown() ||
+                              ui->butLeftForward->isDown()) -
+             static_cast<int>(ui->butRight->isDown() || ui->butRightBack->isDown() ||
+                              ui->butRightForward->isDown()));
+
+        route[0].angular_vel =
+            ui->sliderAngVel->value() * (static_cast<int>(ui->butRotLeft->isDown()) -
+                                         static_cast<int>(ui->butRotRight->isDown()));
     }
-
-    sendTcp();
+    sendRoute(route);
     tcpResendTimer->start(resendTime);
 }
 
-
 void MainWindow::keyPressEvent(QKeyEvent *keyEvent)
-{  
-    if(keyEvent->isAutoRepeat()) {
+{
+    if (keyEvent->isAutoRepeat())
+    {
         keyEvent->accept();
         return;
     }
@@ -242,10 +238,6 @@ void MainWindow::keyPressEvent(QKeyEvent *keyEvent)
     case Qt::Key_Period:
         pressBut(ui->butRotRight);
         break;
-    case Qt::Key_P:
-        pressBut(ui->butRandomMove);
-        break;
-
     default:
         break;
     }
@@ -253,10 +245,10 @@ void MainWindow::keyPressEvent(QKeyEvent *keyEvent)
     keyEvent->accept();
 }
 
-
 void MainWindow::keyReleaseEvent(QKeyEvent *keyEvent)
 {
-    if(keyEvent->isAutoRepeat()) {
+    if (keyEvent->isAutoRepeat())
+    {
         keyEvent->accept();
         return;
     }
@@ -294,13 +286,7 @@ void MainWindow::keyReleaseEvent(QKeyEvent *keyEvent)
         releasBut(ui->butRotLeft);
         break;
     case Qt::Key_Period:
-        releasBut(ui->butRotRight );
-        break;
-    case Qt::Key_P:
-        releasBut(ui->butRandomMove);
-        break;
-    case Qt::Key_1: case Qt::Key_2: case Qt::Key_3: case Qt::Key_4: case Qt::Key_5:
-        sendTcpComand();
+        releasBut(ui->butRotRight);
         break;
     default:
         break;
@@ -309,20 +295,17 @@ void MainWindow::keyReleaseEvent(QKeyEvent *keyEvent)
     keyEvent->accept();
 }
 
-
-void MainWindow::pressBut(QPushButton* button)
+void MainWindow::pressBut(QPushButton *button)
 {
     button->setDown(true);
     emit button->pressed();
 }
 
-
-void MainWindow::releasBut(QPushButton* button)
+void MainWindow::releasBut(QPushButton *button)
 {
     button->setDown(false);
     emit button->released();
 }
-
 
 MainWindow::~MainWindow()
 {
