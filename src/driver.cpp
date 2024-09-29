@@ -67,7 +67,7 @@ void DriverTask::task()
         {
             LOGGER_STREAM(MSG_LVL::ERROR, e.what());
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(reconnect_delay));
+        try_process_commands(std::chrono::milliseconds(reconnect_delay));
     }
 }
 
@@ -81,6 +81,7 @@ void DriverTask::spin_route()
             route.pop();
             driver->set_speed(task.longitudinal_vel, task.transversal_vel, task.angular_vel);
             try_process_commands(std::chrono::milliseconds(task.duration));
+            // TODO
         }
         else
         {
@@ -90,20 +91,33 @@ void DriverTask::spin_route()
     }
 }
 
-void DriverTask::set_route(std::queue<RouteStep> &&n_route)
+void DriverTask::add_route_steps(std::queue<RouteStep> &&n_route, const bool reset)
 {
-    route = n_route;
+    if (reset)
+    {
+        route = std::move(n_route);
+        return;
+    }
+    for (; !n_route.empty(); n_route.pop())
+    {
+        route.push(n_route.front());
+    }
 }
 
 void RouteCommand::execute(Task &task)
 {
     DriverTask &driver_task = dynamic_cast<DriverTask &>(task);
-    driver_task.set_route(std::move(new_route));
+    driver_task.add_route_steps(std::move(new_route), reset_route);
 }
 
 void RouteCommand::add_step(const RouteStep &step)
 {
     new_route.push(step);
+}
+
+void RouteCommand::set_reset(const bool reset_flag)
+{
+    reset_route = reset_flag;
 }
 
 } // namespace ybotln

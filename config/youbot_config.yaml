@@ -7,4 +7,4 @@ driver:
   reconnect_delay: 5000 # ms
 tcp_server:
   port: 10000
-  timeout: 2000          # ms
+  timeout: 500          # ms

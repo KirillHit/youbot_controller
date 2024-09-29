@@ -40,7 +40,7 @@ class DriverTask : public Task
     DriverTask(std::string name);
     ~DriverTask() = default;
     void update_parameters();
-    void set_route(std::queue<RouteStep> &&n_route);
+    void add_route_steps(std::queue<RouteStep> &&n_route, const bool reset = false);
 
   private:
     void task() override;
@@ -57,9 +57,11 @@ class RouteCommand : public Command
     RouteCommand() = default;
     void execute(Task &task) override;
     void add_step(const RouteStep &step);
+    void set_reset(const bool reset_flag);
 
   private:
     std::queue<RouteStep> new_route;
+    bool reset_route = true;
 };
 
 } // namespace ybotln

@@ -134,12 +134,10 @@ void Task::process_commands()
 {
     std::unique_lock<std::mutex> lock(cmd_lock);
     std::queue<std::shared_ptr<Command>> exe_cmds;
-    std::swap(commands, exe_cmds);
+    commands.swap(exe_cmds);
     lock.unlock();
-    while (!exe_cmds.empty())
-    {
+    for (; !exe_cmds.empty(); exe_cmds.pop()){
         exe_cmds.front()->execute(*this);
-        exe_cmds.pop();
     }
 }
 
@@ -206,7 +204,7 @@ void TaskPool::add_task(std::unique_ptr<Task> &&task)
 void TaskPool::add_command_to(std::string name, std::shared_ptr<Command> command)
 {
     std::shared_lock<std::shared_mutex> lock(tasks_lock);
-    if (!tasks.contains("name"))
+    if (!tasks.contains(name))
     {
         LOGGER_STREAM(MSG_LVL::WARN, "Attempt to access a non-existent task: " << name);
         return;

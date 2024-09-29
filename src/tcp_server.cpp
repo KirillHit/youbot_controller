@@ -24,8 +24,13 @@ void TcpServerTask::start_server()
     server.set_socket("", tcp_server_port);
     server.set_keepalive(1, 1, 1);
     server.set_timeout(tcp_server_timeout);
-    server.socket_bind();
-    LOGGER_STREAM(MSG_LVL::INFO, "Tsp server running on port " << tcp_server_timeout);
+    while ((server.socket_bind() < 0) && !stop_flag)
+    {
+        LOGGER_STREAM(MSG_LVL::ERROR,
+                      "Failed to bind socket! Make sure port " << tcp_server_port << " is free.");
+        try_process_commands(std::chrono::milliseconds(tcp_server_timeout));
+    }
+    LOGGER_STREAM(MSG_LVL::INFO, "Tsp server running on port " << tcp_server_port);
 }
 
 void TcpServerTask::task()
@@ -51,17 +56,20 @@ void TcpServerTask::receive()
     switch (rx_buffer[0])
     {
     case static_cast<uint8_t>(DataId::GO_ROUTE): {
-        RouteStepMsg *step_msg = reinterpret_cast<RouteStepMsg *>(&rx_buffer[2]);
+
+        RouteMsgHeader *route_header = reinterpret_cast<RouteMsgHeader *>(&rx_buffer[1]);
+        RouteStepMsg *step_msg = reinterpret_cast<RouteStepMsg *>(&rx_buffer[3]);
         auto cmd = std::make_shared<RouteCommand>();
-        for (size_t idx = rx_buffer[2]; idx; --idx)
+        cmd->set_reset(route_header->reset_route);
+        for (size_t idx = route_header->step_count; idx; --idx)
         {
             RouteStep step{.longitudinal_vel =
                                static_cast<double>(step_msg->longitudinal_vel) / 1000,
                            .transversal_vel = static_cast<double>(step_msg->transversal_vel) / 1000,
                            .angular_vel = static_cast<double>(step_msg->angular_vel) / 1000,
                            .duration = static_cast<int>(step_msg->duration)};
-            cmd->add_step(std::move(step));
             ++step_msg;
+            cmd->add_step(std::move(step));
         }
         emit_command("driver", cmd);
         break;
