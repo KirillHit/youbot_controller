@@ -58,8 +58,8 @@ class MainWindow : public QMainWindow
     Ui::MainWindow *ui;
     QTcpSocket *tcpSocket = nullptr;
     QTimer *tcpResendTimer = nullptr;
-    const int resendTime = 100;      // ms
-    const int routeResolution = 200; // ms
+    const int resendTime = 400;      // ms
+    const int routeResolution = 500; // ms
     std::vector<uint8_t> txBuffer;
     std::vector<uint8_t> rxBuffer;
 };

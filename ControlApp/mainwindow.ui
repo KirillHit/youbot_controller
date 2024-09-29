@@ -61,7 +61,7 @@
              </font>
             </property>
             <property name="text">
-             <string>192.168.186.112</string>
+             <string>127.0.0.1</string>
             </property>
            </widget>
           </item>
@@ -85,7 +85,7 @@
              </font>
             </property>
             <property name="text">
-             <string>10001</string>
+             <string>10000</string>
             </property>
            </widget>
           </item>

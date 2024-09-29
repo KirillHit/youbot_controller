@@ -84,14 +84,14 @@ void MainWindow::sendRoute(const std::vector<RouteStep> &route_list)
         if (step_count >= MAX_ROUTE_STEPS)
         {
             route_header->step_count = MAX_ROUTE_STEPS;
-            sendTcp(MAX_ROUTE_STEPS);
+            sendTcp(TX_MSG_SIZE);
             route_header->reset_route = 0;
             step_count = 0;
         }
     }
     size_t msg_size = route_list.size() % MAX_ROUTE_STEPS;
     route_header->step_count = static_cast<uint8_t>(msg_size);
-    sendTcp(msg_size);
+    sendTcp(TX_MSG_SIZE);
 }
 
 void MainWindow::displayNetError(QAbstractSocket::SocketError socketError)
@@ -174,22 +174,27 @@ void MainWindow::buttonHandle()
     if (!ui->butStop->isDown())
     {
         route[0].longitudinal_vel =
-            ui->sliderLinVel->value() *
-            (static_cast<int>(ui->butForward->isDown() || ui->butLeftForward->isDown() ||
-                              ui->butRightForward->isDown()) -
-             static_cast<int>(ui->butBack->isDown() || ui->butLeftBack->isDown() ||
-                              ui->butRightBack->isDown()));
+            static_cast<double>(
+                ui->sliderLinVel->value() *
+                (static_cast<int>(ui->butForward->isDown() || ui->butLeftForward->isDown() ||
+                                  ui->butRightForward->isDown()) -
+                 static_cast<int>(ui->butBack->isDown() || ui->butLeftBack->isDown() ||
+                                  ui->butRightBack->isDown()))) /
+            100.0;
 
         route[0].transversal_vel =
-            ui->sliderLinVel->value() *
-            (static_cast<int>(ui->butLeft->isDown() || ui->butLeftBack->isDown() ||
-                              ui->butLeftForward->isDown()) -
-             static_cast<int>(ui->butRight->isDown() || ui->butRightBack->isDown() ||
-                              ui->butRightForward->isDown()));
+            static_cast<double>(
+                ui->sliderLinVel->value() *
+                (static_cast<int>(ui->butLeft->isDown() || ui->butLeftBack->isDown() ||
+                                  ui->butLeftForward->isDown()) -
+                 static_cast<int>(ui->butRight->isDown() || ui->butRightBack->isDown() ||
+                                  ui->butRightForward->isDown()))) /
+            100.0;
 
-        route[0].angular_vel =
-            ui->sliderAngVel->value() * (static_cast<int>(ui->butRotLeft->isDown()) -
-                                         static_cast<int>(ui->butRotRight->isDown()));
+        route[0].angular_vel = static_cast<double>(ui->sliderAngVel->value() *
+                                                   (static_cast<int>(ui->butRotLeft->isDown()) -
+                                                    static_cast<int>(ui->butRotRight->isDown()))) /
+                               100.0;
     }
     sendRoute(route);
     tcpResendTimer->start(resendTime);
