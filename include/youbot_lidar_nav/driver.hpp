@@ -49,6 +49,7 @@ class DriverTask : public Task
     std::unique_ptr<Driver> driver;
     std::queue<RouteStep> route;
     int reconnect_delay;
+    bool break_route_step = false;
 };
 
 class RouteCommand : public Command

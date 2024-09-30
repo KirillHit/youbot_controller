@@ -39,7 +39,9 @@ class Task
     void emit_command(std::string name, std::shared_ptr<Command> command);
     void wait_process_commands();
     bool try_process_commands();
-    bool try_process_commands(const std::chrono::milliseconds rel_time);
+    bool try_process_commands_for(const std::chrono::milliseconds &rel_time);
+    bool try_process_commands_until(
+        const std::chrono::time_point<std::chrono::steady_clock> &time_point);
     std::atomic<bool> stop_flag;
 
   private:

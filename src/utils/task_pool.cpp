@@ -116,7 +116,7 @@ bool Task::try_process_commands()
     return false;
 }
 
-bool Task::try_process_commands(const std::chrono::milliseconds rel_time)
+bool Task::try_process_commands_for(const std::chrono::milliseconds &rel_time)
 {
     if (stop_flag)
     {
@@ -130,13 +130,28 @@ bool Task::try_process_commands(const std::chrono::milliseconds rel_time)
     return false;
 }
 
+bool Task::try_process_commands_until(const std::chrono::time_point<std::chrono::steady_clock> &time_point) 
+{
+    if (stop_flag)
+    {
+        return false;
+    }
+    if (command_smph.try_acquire_until(time_point))
+    {
+        process_commands();
+        return true;
+    }
+    return false;
+}
+
 void Task::process_commands()
 {
     std::unique_lock<std::mutex> lock(cmd_lock);
     std::queue<std::shared_ptr<Command>> exe_cmds;
     commands.swap(exe_cmds);
     lock.unlock();
-    for (; !exe_cmds.empty(); exe_cmds.pop()){
+    for (; !exe_cmds.empty(); exe_cmds.pop())
+    {
         exe_cmds.front()->execute(*this);
     }
 }

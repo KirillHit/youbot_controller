@@ -67,7 +67,7 @@ void DriverTask::task()
         {
             LOGGER_STREAM(MSG_LVL::ERROR, e.what());
         }
-        try_process_commands(std::chrono::milliseconds(reconnect_delay));
+        try_process_commands_for(std::chrono::milliseconds(reconnect_delay));
     }
 }
 
@@ -80,8 +80,17 @@ void DriverTask::spin_route()
             ybotln::RouteStep task = route.front();
             route.pop();
             driver->set_speed(task.longitudinal_vel, task.transversal_vel, task.angular_vel);
-            try_process_commands(std::chrono::milliseconds(task.duration));
-            // TODO
+
+            auto end_time =
+                std::chrono::steady_clock::now() + std::chrono::milliseconds(task.duration);
+            while (try_process_commands_until(end_time))
+            {
+                if (break_route_step)
+                {
+                    break_route_step = false;
+                    break;
+                }
+            }
         }
         else
         {
@@ -96,6 +105,7 @@ void DriverTask::add_route_steps(std::queue<RouteStep> &&n_route, const bool res
     if (reset)
     {
         route = std::move(n_route);
+        break_route_step = true;
         return;
     }
     for (; !n_route.empty(); n_route.pop())

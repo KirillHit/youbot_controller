@@ -28,7 +28,7 @@ void TcpServerTask::start_server()
     {
         LOGGER_STREAM(MSG_LVL::ERROR,
                       "Failed to bind socket! Make sure port " << tcp_server_port << " is free.");
-        try_process_commands(std::chrono::milliseconds(tcp_server_timeout));
+        try_process_commands_for(std::chrono::milliseconds(tcp_server_timeout));
     }
     LOGGER_STREAM(MSG_LVL::INFO, "Tsp server running on port " << tcp_server_port);
 }
