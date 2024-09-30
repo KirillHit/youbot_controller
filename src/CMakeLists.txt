@@ -24,6 +24,7 @@ target_sources(
     youbot_lidar_nav.cpp
     driver.cpp
     tcp_server.cpp
+    lidar.cpp
 )
 
 install(

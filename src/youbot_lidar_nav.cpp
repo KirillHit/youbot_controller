@@ -27,9 +27,10 @@ void init_default_parameters()
     PARAMETERS.set<double>("logger/save_path", false);
     PARAMETERS.set<std::string>("logger/save", "");
     PARAMETERS.set<double>("driver/max_leaner_vel", 0.5);
-    PARAMETERS.set<int>("driver/reconnect_delay", 1000);
     PARAMETERS.set<int>("tcp_server/port", 10000);
     PARAMETERS.set<int>("tcp_server/timeout", 500);
+    PARAMETERS.set<std::string>("lidar/device_name", "/dev/ttyACM0");
+    PARAMETERS.set<long>("lidar/baudrate", 115200);
 }
 
 void init_config()
@@ -44,9 +45,11 @@ void init_config()
     PARAMETERS.set("logger/save_path", config["logger"]["save_path"].as<std::string>());
     PARAMETERS.set("logger/save", config["logger"]["save"].as<bool>());
     PARAMETERS.set("driver/max_leaner_vel", config["driver"]["max_leaner_vel"].as<double>());
-    PARAMETERS.set("driver/reconnect_delay", config["driver"]["reconnect_delay"].as<int>());
     PARAMETERS.set("tcp_server/port", config["tcp_server"]["port"].as<int>());
     PARAMETERS.set("tcp_server/timeout", config["tcp_server"]["timeout"].as<int>());
+    PARAMETERS.set("tcp_server/port", config["tcp_server"]["port"].as<int>());
+    PARAMETERS.set("tcp_server/timeout", config["tcp_server"]["timeout"].as<int>());
+
 
     LOGGER_STREAM(MSG_LVL::INFO, "Loading parameters completed successfully");
 }

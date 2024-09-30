@@ -48,7 +48,7 @@ class DriverTask : public Task
 
     std::unique_ptr<Driver> driver;
     std::queue<RouteStep> route;
-    int reconnect_delay;
+    int reconnect_delay = 5000; // ms
     bool break_route_step = false;
 };
 

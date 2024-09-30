@@ -48,10 +48,7 @@ DriverTask::DriverTask(std::string name) : Task(name)
     update_parameters();
 }
 
-void DriverTask::update_parameters()
-{
-    reconnect_delay = PARAMETERS.get<int>("driver/reconnect_delay");
-}
+void DriverTask::update_parameters() {}
 
 void DriverTask::task()
 {
