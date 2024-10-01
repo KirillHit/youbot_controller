@@ -47,12 +47,12 @@ void TcpServerTask::task()
 
 void TcpServerTask::receive()
 {
-    if (server.receive(reinterpret_cast<char *>(rx_buffer.data()), RX_MSG_SIZE) < 0)
+    if (server.receive(reinterpret_cast<char *>(rx_buffer.data()), RX_MSG_SIZE) <= 0)
     {
         LOGGER_STREAM(MSG_LVL::DEBUG, "Failed to receive message");
         return;
     }
-
+    // TODO disconnect - stop
     switch (rx_buffer[0])
     {
     case static_cast<uint8_t>(DataId::GO_ROUTE): {
