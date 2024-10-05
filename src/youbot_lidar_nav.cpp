@@ -7,6 +7,7 @@
 
 #include "yaml-cpp/yaml.h"
 #include "youbot_lidar_nav/driver.hpp"
+#include "youbot_lidar_nav/lidar.hpp"
 #include "youbot_lidar_nav/tcp_server.hpp"
 #include "youbot_lidar_nav/utils/logger.hpp"
 #include "youbot_lidar_nav/utils/parameter_server.hpp"
@@ -21,7 +22,7 @@ void sigint_handler(int signal)
     signal_smph.release();
 }
 
-void init_default_parameters()
+void default_parameters()
 {
     PARAMETERS.set<double>("logger/debug", false);
     PARAMETERS.set<double>("logger/save_path", false);
@@ -30,7 +31,7 @@ void init_default_parameters()
     PARAMETERS.set<int>("tcp_server/port", 10000);
     PARAMETERS.set<int>("tcp_server/timeout", 500);
     PARAMETERS.set<std::string>("lidar/device_name", "/dev/ttyACM0");
-    PARAMETERS.set<long>("lidar/baudrate", 115200);
+    PARAMETERS.set<int>("lidar/baudrate", 115200);
 }
 
 void load_config()
@@ -49,7 +50,8 @@ void load_config()
     PARAMETERS.set("tcp_server/timeout", config["tcp_server"]["timeout"].as<int>());
     PARAMETERS.set("tcp_server/port", config["tcp_server"]["port"].as<int>());
     PARAMETERS.set("tcp_server/timeout", config["tcp_server"]["timeout"].as<int>());
-
+    PARAMETERS.set("lidar/device_name", config["lidar"]["device_name"].as<std::string>());
+    PARAMETERS.set("lidar/baudrate", config["lidar"]["baudrate"].as<int>());
 
     LOGGER_STREAM(MSG_LVL::INFO, "Loading parameters completed successfully");
 }
@@ -60,7 +62,7 @@ int main()
 
     signal(SIGINT, sigint_handler);
 
-    init_default_parameters();
+    default_parameters();
 
     try
     {
@@ -80,6 +82,9 @@ int main()
 
     auto tcp_server_task = std::make_unique<TcpServerTask>("tcp_server");
     task_pool.add_task(std::move(tcp_server_task));
+
+    auto lidar_task = std::make_unique<LidarTask>("lidar");
+    task_pool.add_task(std::move(lidar_task));
 
     task_pool.start_all();
 
