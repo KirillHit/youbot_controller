@@ -21,6 +21,12 @@ MainWindow::MainWindow(QWidget *parent)
     connect(tcpSocket, &QAbstractSocket::disconnected, this, &MainWindow::disconnectedHandle);
 }
 
+MainWindow::~MainWindow()
+{
+    disconnect();
+    delete ui;
+}
+
 void MainWindow::sliderInit()
 {
     ui->labelLinVel->setText(QString::number(ui->sliderLinVel->value() / 100.0, 'f', 2));
@@ -53,6 +59,8 @@ void MainWindow::requestNewConnection()
 
 void MainWindow::disconnect()
 {
+    sendStop();
+    tcpSocket->waitForBytesWritten(1000);
     tcpSocket->abort();
     ui->butConnect->setEnabled(true);
 }
@@ -92,6 +100,16 @@ void MainWindow::sendRoute(const std::vector<RouteStep> &route_list)
     size_t msg_size = route_list.size() % MAX_ROUTE_STEPS;
     route_header->step_count = static_cast<uint8_t>(msg_size);
     sendTcp(TX_MSG_SIZE);
+}
+
+void MainWindow::sendStop()
+{
+    std::vector<RouteStep> route_list(1);
+    route_list[0].longitudinal_vel = 0;
+    route_list[0].transversal_vel = 0;
+    route_list[0].angular_vel = 0;
+    route_list[0].duration = 0;
+    sendRoute(route_list);
 }
 
 void MainWindow::displayNetError(QAbstractSocket::SocketError socketError)
@@ -310,9 +328,4 @@ void MainWindow::releasBut(QPushButton *button)
 {
     button->setDown(false);
     emit button->released();
-}
-
-MainWindow::~MainWindow()
-{
-    delete ui;
 }

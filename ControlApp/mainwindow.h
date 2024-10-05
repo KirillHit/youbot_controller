@@ -39,7 +39,6 @@ class MainWindow : public QMainWindow
     void releasBut(QPushButton *button);
     void buttonInit();
     void buttonHandle();
-    void buttonRandHandle();
 
     void sliderInit();
     void sliderHandle(int value);
@@ -53,13 +52,14 @@ class MainWindow : public QMainWindow
     void disconnectedHandle();
 
     void sendRoute(const std::vector<RouteStep> &route_list);
+    void sendStop();
 
   private:
     Ui::MainWindow *ui;
     QTcpSocket *tcpSocket = nullptr;
     QTimer *tcpResendTimer = nullptr;
-    const int resendTime = 400;      // ms
-    const int routeResolution = 500; // ms
+    const int resendTime = 500;      // ms
+    const int routeResolution = 600; // ms
     std::vector<uint8_t> txBuffer;
     std::vector<uint8_t> rxBuffer;
 };
