@@ -27,7 +27,7 @@ class TcpServerTask : public Task
     std::vector<uint8_t> rx_buffer;
     int tcp_server_port;
     int tcp_server_timeout;
-
+    bool con_alive = false;
 };
 
 } // namespace ybotln

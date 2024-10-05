@@ -40,7 +40,6 @@ void TcpServerTask::task()
     while (!stop_flag)
     {
         receive();
-
         try_process_commands();
     }
 }
@@ -49,10 +48,20 @@ void TcpServerTask::receive()
 {
     if (server.receive(reinterpret_cast<char *>(rx_buffer.data()), RX_MSG_SIZE) <= 0)
     {
-        LOGGER_STREAM(MSG_LVL::DEBUG, "Failed to receive message");
+        if (con_alive)
+        {
+            LOGGER_STREAM(MSG_LVL::WARN, "Failed to receive message. Emergency stop");
+            auto cmd = std::make_shared<RouteCommand>();
+            cmd->set_reset(true);
+            RouteStep step{
+                .longitudinal_vel = 0, .transversal_vel = 0, .angular_vel = 0, .duration = 0};
+            cmd->add_step(std::move(step));
+            emit_command("driver", cmd);
+            con_alive = false;
+        }
         return;
     }
-    // TODO disconnect - stop
+    con_alive = true;
     switch (rx_buffer[0])
     {
     case static_cast<uint8_t>(DataId::GO_ROUTE): {
