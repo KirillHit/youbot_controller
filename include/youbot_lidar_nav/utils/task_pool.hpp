@@ -64,6 +64,24 @@ class Command
     virtual void execute(Task &task) = 0;
 };
 
+class Request : public Command
+{
+  public:
+    Request();
+    bool try_process_request();
+    bool try_process_request_for(const std::chrono::milliseconds &rel_time);
+    void execute(Task &task) final;
+    virtual void request(Task &task) = 0;
+
+  protected:
+    // Derived classes should use this mutex to avoid data races
+    std::mutex request_lock;
+
+  private:
+    // Released after request is completed
+    std::binary_semaphore request_smph;
+};
+
 class TaskPool
 {
   public:

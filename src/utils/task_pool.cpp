@@ -151,7 +151,7 @@ template bool Task::try_process_commands_until(
     const std::chrono::time_point<std::chrono::system_clock, std::chrono::system_clock::duration>
         &time_point);
 
-    void Task::process_commands()
+void Task::process_commands()
 {
     std::unique_lock<std::mutex> lock(cmd_lock);
     std::queue<std::shared_ptr<Command>> exe_cmds;
@@ -232,6 +232,24 @@ void TaskPool::add_command_to(std::string name, std::shared_ptr<Command> command
         return;
     }
     tasks.at(name)->add_command(command);
+}
+
+Request::Request() : request_smph{0} {}
+
+bool Request::try_process_request()
+{
+    return request_smph.try_acquire();
+}
+
+bool Request::try_process_request_for(const std::chrono::milliseconds &rel_time)
+{
+    return request_smph.try_acquire_for(rel_time);
+}
+
+void Request::execute(Task &task)
+{
+    request(task);
+    request_smph.release();
 }
 
 } // namespace ybotln
