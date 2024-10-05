@@ -1,4 +1,4 @@
-#include "youbot_lidar_nav/lidar.hpp"
+#include "youbot_lidar_nav/tasks/lidar_task.hpp"
 
 namespace ybotln
 {

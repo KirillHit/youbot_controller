@@ -1,5 +1,5 @@
-#include "youbot_lidar_nav/tcp_server.hpp"
-#include "youbot_lidar_nav/driver.hpp"
+#include "youbot_lidar_nav/tasks/driver_task.hpp"
+#include "youbot_lidar_nav/tasks/tcp_server_task.hpp"
 #include "youbot_lidar_nav/utils/logger.hpp"
 
 namespace ybotln

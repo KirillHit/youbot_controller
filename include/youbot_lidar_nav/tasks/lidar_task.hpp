@@ -1,10 +1,10 @@
-#ifndef LIDAR_HPP
-#define LIDAR_HPP
+#ifndef LIDAR_TASK_HPP
+#define LIDAR_TASK_HPP
 
 #include "Urg_driver.h"
-#include "utils/logger.hpp"
-#include "utils/parameter_server.hpp"
-#include "utils/task_pool.hpp"
+#include "youbot_lidar_nav/utils/logger.hpp"
+#include "youbot_lidar_nav/utils/parameter_server.hpp"
+#include "youbot_lidar_nav/utils/task_pool.hpp"
 
 namespace ybotln
 {
@@ -43,7 +43,7 @@ class GetDataRequest : public Request
     bool get_result(std::vector<long> &data, long &time_stamp);
 
   private:
-    std::vector<long> data_; 
+    std::vector<long> data_;
     long time_stamp_;
     bool result_;
 };

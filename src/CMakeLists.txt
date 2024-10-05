@@ -21,10 +21,10 @@ target_sources(
   PRIVATE
     utils/task_pool.cpp
     utils/logger.cpp
+    tasks/driver_task.cpp
+    tasks/tcp_server_task.cpp
+    tasks/lidar_task.cpp
     youbot_lidar_nav.cpp
-    driver.cpp
-    tcp_server.cpp
-    lidar.cpp
 )
 
 install(
