@@ -1,9 +1,10 @@
 #ifndef LIDAR_TASK_HPP
 #define LIDAR_TASK_HPP
 
+#include <string>
+#include <vector>
+
 #include "Urg_driver.h"
-#include "youbot_lidar_nav/utils/logger.hpp"
-#include "youbot_lidar_nav/utils/parameter_server.hpp"
 #include "youbot_lidar_nav/utils/task_pool.hpp"
 
 namespace ybotln

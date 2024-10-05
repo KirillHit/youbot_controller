@@ -1,4 +1,6 @@
 #include "youbot_lidar_nav/tasks/lidar_task.hpp"
+#include "youbot_lidar_nav/utils/logger.hpp"
+#include "youbot_lidar_nav/utils/parameter_server.hpp"
 
 namespace ybotln
 {

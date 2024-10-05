@@ -1,10 +1,11 @@
 #ifndef TCP_SERVER_TASK_HPP
 #define TCP_SERVER_TASK_HPP
 
+#include <cstdint>
+#include <string>
 #include <vector>
 
 #include "simple_socket/simple_socket.hpp"
-#include "youbot_lidar_nav/protocol.hpp"
 #include "youbot_lidar_nav/utils/task_pool.hpp"
 
 namespace ybotln

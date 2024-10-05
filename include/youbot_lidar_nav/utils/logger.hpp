@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <iostream>
 #include <sstream>
+#include <string>
 
 #define LOGGER_STREAM(lvl, stream)                                                                 \
     ({                                                                                             \

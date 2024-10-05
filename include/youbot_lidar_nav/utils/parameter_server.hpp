@@ -1,7 +1,6 @@
 #ifndef PARAMETER_SERVER_HPP
 #define PARAMETER_SERVER_HPP
 
-#include <functional>
 #include <map>
 #include <string>
 
