@@ -130,7 +130,8 @@ bool Task::try_process_commands_for(const std::chrono::milliseconds &rel_time)
     return false;
 }
 
-bool Task::try_process_commands_until(const std::chrono::time_point<std::chrono::steady_clock> &time_point) 
+template <typename _Clock, typename _Dur>
+bool Task::try_process_commands_until(const std::chrono::time_point<_Clock, _Dur> &time_point)
 {
     if (stop_flag)
     {
@@ -143,8 +144,14 @@ bool Task::try_process_commands_until(const std::chrono::time_point<std::chrono:
     }
     return false;
 }
+template bool Task::try_process_commands_until(
+    const std::chrono::time_point<std::chrono::steady_clock, std::chrono::steady_clock::duration>
+        &time_point);
+template bool Task::try_process_commands_until(
+    const std::chrono::time_point<std::chrono::system_clock, std::chrono::system_clock::duration>
+        &time_point);
 
-void Task::process_commands()
+    void Task::process_commands()
 {
     std::unique_lock<std::mutex> lock(cmd_lock);
     std::queue<std::shared_ptr<Command>> exe_cmds;

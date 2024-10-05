@@ -40,8 +40,8 @@ class Task
     void wait_process_commands();
     bool try_process_commands();
     bool try_process_commands_for(const std::chrono::milliseconds &rel_time);
-    bool try_process_commands_until(
-        const std::chrono::time_point<std::chrono::steady_clock> &time_point);
+    template <typename _Clock, typename _Dur>
+    bool try_process_commands_until(const std::chrono::time_point<_Clock, _Dur> &time_point);
     std::atomic<bool> stop_flag;
 
   private:
