@@ -159,7 +159,7 @@ void Task::process_commands()
     lock.unlock();
     for (; !exe_cmds.empty(); exe_cmds.pop())
     {
-        exe_cmds.front()->execute(*this);
+        exe_cmds.front()->execute_dec(*this);
     }
 }
 
@@ -232,6 +232,20 @@ void TaskPool::add_command_to(std::string name, std::shared_ptr<Command> command
         return;
     }
     tasks.at(name)->add_command(command);
+}
+
+/**************************** Command interface ****************************/
+
+void Command::execute_dec(Task &task)
+{
+    try
+    {
+        execute(task);
+    }
+    catch (const std::bad_cast &e)
+    {
+        LOGGER_STREAM(MSG_LVL::ERROR, "The task received an unexpected command!");
+    }
 }
 
 Request::Request() : request_smph{0} {}

@@ -61,6 +61,7 @@ class Command
 {
   public:
     virtual ~Command() = default;
+    void execute_dec(Task &task);
     virtual void execute(Task &task) = 0;
 };
 
