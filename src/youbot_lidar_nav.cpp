@@ -33,7 +33,7 @@ void init_default_parameters()
     PARAMETERS.set<long>("lidar/baudrate", 115200);
 }
 
-void init_config()
+void load_config()
 {
     std::string config_path = std::string(SOURCE_DIR) + "config/youbot_config.yaml";
 
@@ -64,15 +64,11 @@ int main()
 
     try
     {
-        init_config();
+        load_config();
     }
-    catch (const YAML::BadFile &e)
+    catch (const std::runtime_error &e)
     {
-        LOGGER_STREAM(MSG_LVL::ERROR, "Failed to load parameters! " << e.msg);
-    }
-    catch (const YAML::RepresentationException &e)
-    {
-        LOGGER_STREAM(MSG_LVL::ERROR, "Failed to load parameters! " << e.msg);
+        LOGGER_STREAM(MSG_LVL::ERROR, "Failed to load parameters! " << e.what());
     }
 
     Logger::get_logger().update_parameters();
