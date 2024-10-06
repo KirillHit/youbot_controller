@@ -13,14 +13,14 @@ Driver::Driver() : youbot_base("youbot-base", std::string(SOURCE_DIR) + "config/
     youbot_base.doJointCommutation();
 }
 
-void Driver::update_parameters()
-{
-    max_leaner_vel = PARAMETERS.get<double>("driver/max_leaner_vel");
-}
-
 Driver::~Driver()
 {
     set_stop();
+}
+
+void Driver::update_parameters()
+{
+    max_leaner_vel = PARAMETERS.get<double>("driver/max_leaner_vel");
 }
 
 void Driver::set_stop()
@@ -44,6 +44,24 @@ void Driver::set_speed(const double &longitudinal_vel, const double &transversal
     quantity<si::angular_velocity> angularVelocity = angular_vel * radian_per_second;
 
     youbot_base.setBaseVelocity(longitudinalVelocity, transversalVelocity, angularVelocity);
+}
+
+void Driver::get_odom(double &longitudinal, double &transversal, double &angular)
+{
+    quantity<si::length> longitudinal_si, transversal_si;
+    quantity<si::plane_angle> angular_si;
+    youbot_base.getBasePosition(longitudinal_si, transversal_si, angular_si);
+    longitudinal = quantity_cast<double>(longitudinal_si);
+    transversal = quantity_cast<double>(longitudinal_si);
+    angular = quantity_cast<double>(longitudinal_si);
+}
+
+void Driver::set_odom(const double &longitudinal, const double &transversal, const double &angular)
+{
+    quantity<si::length> longitudinal_si = longitudinal * meter;
+    quantity<si::length> transversal_si = transversal * meter;
+    quantity<si::plane_angle> angular_si = angular * radian;
+    youbot_base.setBasePosition(longitudinal_si, transversal_si, angular_si);
 }
 
 DriverTask::DriverTask(std::string name) : Task(name)
@@ -114,6 +132,12 @@ void DriverTask::add_route_steps(std::queue<RouteStep> &&n_route, const bool res
     }
 }
 
+void DriverTask::get_odom()
+{
+    double longitudinal, transversal, angular;
+    driver->get_odom(longitudinal, transversal, angular);
+}
+
 void RouteCommand::execute(Task &task)
 {
     DriverTask &driver_task = dynamic_cast<DriverTask &>(task);
@@ -128,6 +152,21 @@ void RouteCommand::add_step(const RouteStep &step)
 void RouteCommand::set_reset(const bool reset_flag)
 {
     reset_route = reset_flag;
+}
+
+void GetOdomRequest::request(Task &task)
+{
+    std::lock_guard<std::mutex> lock(request_lock);
+    DriverTask &driver_task = dynamic_cast<DriverTask &>(task);
+    // result_ = lidar_task.get_distance(data_, time_stamp_);
+}
+
+bool GetOdomRequest::get_result(std::vector<long> &data, long &time_stamp)
+{
+    std::lock_guard<std::mutex> lock(request_lock);
+    data.swap(data_);
+    time_stamp = time_stamp_;
+    return result_;
 }
 
 } // namespace ybotln

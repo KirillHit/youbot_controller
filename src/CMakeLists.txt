@@ -24,6 +24,7 @@ target_sources(
     tasks/driver_task.cpp
     tasks/tcp_server_task.cpp
     tasks/lidar_task.cpp
+    tasks/planner_task.cpp
     youbot_lidar_nav.cpp
 )
 

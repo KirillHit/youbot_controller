@@ -19,6 +19,8 @@ class Driver
     void update_parameters();
     void set_speed(const double &longitudinal_vel, const double &transversal_vel,
                    const double &angular_vel);
+    void get_odom(double &longitudinal, double &transversal, double &angular);
+    void set_odom(const double &longitudinal, const double &transversal, const double &angular);
     void set_stop();
 
   private:
@@ -41,6 +43,7 @@ class DriverTask : public Task
     ~DriverTask() = default;
     void update_parameters();
     void add_route_steps(std::queue<RouteStep> &&n_route, const bool reset = false);
+    void get_odom();
 
   private:
     void task() override;
@@ -63,6 +66,19 @@ class RouteCommand : public Command
   private:
     std::queue<RouteStep> new_route;
     bool reset_route = true;
+};
+
+class GetOdomRequest : public Request
+{
+  public:
+    GetOdomRequest() = default;
+    void request(Task &task) override;
+    bool get_result(std::vector<long> &data, long &time_stamp);
+
+  private:
+    std::vector<long> data_;
+    long time_stamp_;
+    bool result_;
 };
 
 } // namespace ybotln
