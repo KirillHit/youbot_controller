@@ -13,7 +13,7 @@ LidarTask::LidarTask(std::string name) : Task(name)
 void LidarTask::update_parameters()
 {
     device_name = PARAMETERS.get<std::string>("lidar/device_name");
-    baudrate = PARAMETERS.get<long>("lidar/baudrate");
+    baudrate = PARAMETERS.get<int>("lidar/baudrate");
 }
 
 bool LidarTask::connect_lidar()
@@ -67,14 +67,14 @@ bool LidarTask::get_distance(std::vector<long> &data, long &time_stamp)
     return true;
 }
 
-void GetDataRequest::request(Task &task)
+void GetDistanceRequest::request(Task &task)
 {
     std::lock_guard<std::mutex> lock(request_lock);
     LidarTask &lidar_task = dynamic_cast<LidarTask &>(task);
     result_ = lidar_task.get_distance(data_, time_stamp_);
 }
 
-bool GetDataRequest::get_result(std::vector<long> &data, long &time_stamp)
+bool GetDistanceRequest::get_result(std::vector<long> &data, long &time_stamp)
 {
     std::lock_guard<std::mutex> lock(request_lock);
     data.swap(data_);

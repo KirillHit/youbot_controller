@@ -36,10 +36,10 @@ class LidarTask : public Task
     bool lidar_alive = false;
 };
 
-class GetDataRequest : public Request
+class GetDistanceRequest : public Request
 {
   public:
-    GetDataRequest() = default;
+    GetDistanceRequest() = default;
     void request(Task &task) override;
     bool get_result(std::vector<long> &data, long &time_stamp);
 

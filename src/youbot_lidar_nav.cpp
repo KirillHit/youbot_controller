@@ -8,6 +8,7 @@
 #include "yaml-cpp/yaml.h"
 #include "youbot_lidar_nav/tasks/driver_task.hpp"
 #include "youbot_lidar_nav/tasks/lidar_task.hpp"
+#include "youbot_lidar_nav/tasks/planner_task.hpp"
 #include "youbot_lidar_nav/tasks/tcp_server_task.hpp"
 #include "youbot_lidar_nav/utils/logger.hpp"
 #include "youbot_lidar_nav/utils/parameter_server.hpp"
@@ -78,13 +79,13 @@ int main()
     TaskPool task_pool;
 
     auto driver_task = std::make_unique<DriverTask>("driver");
-    task_pool.add_task(std::move(driver_task));
-
     auto tcp_server_task = std::make_unique<TcpServerTask>("tcp_server");
-    task_pool.add_task(std::move(tcp_server_task));
-
     auto lidar_task = std::make_unique<LidarTask>("lidar");
+    auto planner_task = std::make_unique<PlannerTask>("planner");
+    task_pool.add_task(std::move(driver_task));
+    task_pool.add_task(std::move(tcp_server_task));
     task_pool.add_task(std::move(lidar_task));
+    task_pool.add_task(std::move(planner_task));
 
     task_pool.start_all();
 
