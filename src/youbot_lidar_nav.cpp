@@ -25,8 +25,8 @@ void sigint_handler(int signal)
 
 void default_parameters()
 {
-    PARAMETERS.set<double>("logger/debug", false);
-    PARAMETERS.set<double>("logger/save_path", false);
+    PARAMETERS.set<bool>("logger/debug", false);
+    PARAMETERS.set<bool>("logger/save_path", false);
     PARAMETERS.set<std::string>("logger/save", "");
     PARAMETERS.set<double>("driver/max_leaner_vel", 0.5);
     PARAMETERS.set<int>("tcp_server/port", 10000);

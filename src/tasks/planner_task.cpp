@@ -23,14 +23,29 @@ void PlannerTask::task()
     {
         auto distant_request = std::make_shared<GetDistanceRequest>();
         emit_command("lidar", distant_request);
-        distant_request->try_process_request_for(std::chrono::milliseconds(1000));
-        std::vector<long> data;
-        long time_stamp;
-        if (!distant_request->get_result(data, time_stamp))
+
+        auto odom_request = std::make_shared<GetOdomRequest>();
+        emit_command("driver", odom_request);
+
+        distant_request->wait_command();
+        odom_request->wait_command();
+
+        if (distant_request->result())
         {
+            std::vector<long> data;
+            long time_stamp;
+            distant_request->data(data, time_stamp);
             LOGGER_STREAM(MSG_LVL::ERROR, "Failed to get data from lidar!");
+            LOGGER_STREAM(MSG_LVL::DEBUG, time_stamp << " : " << data.size() << " : ");
         }
-        LOGGER_STREAM(MSG_LVL::DEBUG, time_stamp << " : " << data.size()<< " : ");
+
+        if (odom_request->result())
+        {
+            double longitudinal, transversal, angular;
+            odom_request->data(longitudinal, transversal, angular);
+            LOGGER_STREAM(MSG_LVL::ERROR, "Failed to get data from driver!");
+        }
+
         try_process_commands_for(std::chrono::milliseconds(1000));
     }
 }

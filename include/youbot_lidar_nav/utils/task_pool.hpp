@@ -47,6 +47,7 @@ class Task
     void task_dec();
     std::string log_name() const;
     void process_commands();
+    void release_commands();
     std::string task_name;
     std::thread task_thread;
     std::atomic<bool> running;
@@ -59,27 +60,30 @@ class Task
 class Command
 {
   public:
+    Command();
     virtual ~Command() = default;
     void execute_dec(Task &task);
     virtual void execute(Task &task) = 0;
+    void wait_command();
+    bool try_command();
+    bool try_command_for(const std::chrono::milliseconds &rel_time);
+    void release();
+
+  private:
+    // Released after command is completed
+    std::binary_semaphore request_smph;
 };
 
 class Request : public Command
 {
   public:
-    Request();
-    bool try_process_request();
-    bool try_process_request_for(const std::chrono::milliseconds &rel_time);
-    void execute(Task &task) final;
-    virtual void request(Task &task) = 0;
+    Request() = default;
+    bool result() const;
 
   protected:
     // Derived classes should use this mutex to avoid data races
     std::mutex request_lock;
-
-  private:
-    // Released after request is completed
-    std::binary_semaphore request_smph;
+    std::atomic<bool> result_ = false;
 };
 
 class TaskPool

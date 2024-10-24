@@ -14,6 +14,7 @@ Task::Task(std::string name) : task_name{name}, command_smph{0} {}
 Task::~Task()
 {
     stop();
+    release_commands();
     join();
 }
 
@@ -165,6 +166,15 @@ void Task::process_commands()
     }
 }
 
+void Task::release_commands()
+{
+    std::lock_guard<std::mutex> lock(cmd_lock);
+    for (; !commands.empty(); commands.pop())
+    {
+        commands.front()->release();
+    }
+}
+
 /**************************** TaskPool class ****************************/
 
 void TaskPool::start(const std::string name)
@@ -238,6 +248,8 @@ void TaskPool::add_command_to(std::string name, std::shared_ptr<Command> command
 
 /**************************** Command interface ****************************/
 
+Command::Command() : request_smph{0} {}
+
 void Command::execute_dec(Task &task)
 {
     try
@@ -248,24 +260,32 @@ void Command::execute_dec(Task &task)
     {
         LOGGER_STREAM(MSG_LVL::ERROR, "The task received an unexpected command!");
     }
+    release();
 }
 
-Request::Request() : request_smph{0} {}
+void Command::wait_command()
+{
+    request_smph.acquire();
+}
 
-bool Request::try_process_request()
+bool Command::try_command()
 {
     return request_smph.try_acquire();
 }
 
-bool Request::try_process_request_for(const std::chrono::milliseconds &rel_time)
+bool Command::try_command_for(const std::chrono::milliseconds &rel_time)
 {
     return request_smph.try_acquire_for(rel_time);
 }
 
-void Request::execute(Task &task)
+void Command::release()
 {
-    request(task);
     request_smph.release();
+}
+
+bool Request::result() const
+{
+    return result_;
 }
 
 } // namespace ybotln

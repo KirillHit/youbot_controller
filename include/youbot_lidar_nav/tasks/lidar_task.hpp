@@ -40,13 +40,12 @@ class GetDistanceRequest : public Request
 {
   public:
     GetDistanceRequest() = default;
-    void request(Task &task) override;
-    bool get_result(std::vector<long> &data, long &time_stamp);
+    void execute(Task &task) override;
+    void data(std::vector<long> &data, long &time_stamp);
 
   private:
     std::vector<long> data_;
     long time_stamp_;
-    bool result_;
 };
 
 } // namespace ybotln

@@ -67,19 +67,18 @@ bool LidarTask::get_distance(std::vector<long> &data, long &time_stamp)
     return true;
 }
 
-void GetDistanceRequest::request(Task &task)
+void GetDistanceRequest::execute(Task &task)
 {
     std::lock_guard<std::mutex> lock(request_lock);
     LidarTask &lidar_task = dynamic_cast<LidarTask &>(task);
     result_ = lidar_task.get_distance(data_, time_stamp_);
 }
 
-bool GetDistanceRequest::get_result(std::vector<long> &data, long &time_stamp)
+void GetDistanceRequest::data(std::vector<long> &data, long &time_stamp)
 {
     std::lock_guard<std::mutex> lock(request_lock);
     data.swap(data_);
     time_stamp = time_stamp_;
-    return result_;
 }
 
 } // namespace ybotln
