@@ -131,6 +131,8 @@ void DriverTask::add_route_steps(std::queue<RouteStep> &&n_route, const bool res
     }
 }
 
+/**************************** Command interface ****************************/
+
 void RouteCommand::execute(Task &task)
 {
     DriverTask &driver_task = dynamic_cast<DriverTask &>(task);

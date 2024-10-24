@@ -67,6 +67,8 @@ bool LidarTask::get_distance(std::vector<long> &data, long &time_stamp)
     return true;
 }
 
+/**************************** Command interface ****************************/
+
 void GetDistanceRequest::execute(Task &task)
 {
     std::lock_guard<std::mutex> lock(request_lock);
