@@ -14,6 +14,10 @@ DriverTask::DriverTask(std::string name) : Task(name)
 
 DriverTask::~DriverTask()
 {
+    if (!driver)
+    {
+        return;
+    }
     stop();
 }
 

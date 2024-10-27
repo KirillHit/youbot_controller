@@ -241,6 +241,7 @@ void TaskPool::add_command_to(std::string name, std::shared_ptr<Command> command
     if (!tasks.contains(name))
     {
         LOGGER_STREAM(MSG_LVL::WARN, "Attempt to access a non-existent task: " << name);
+        command->release();
         return;
     }
     tasks.at(name)->add_command(command);
