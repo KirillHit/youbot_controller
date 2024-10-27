@@ -57,35 +57,6 @@ class Task
     std::binary_semaphore command_smph; // Signaling the receipt of a command
 };
 
-class Command
-{
-  public:
-    Command();
-    virtual ~Command() = default;
-    void execute_dec(Task &task);
-    virtual void execute(Task &task) = 0;
-    void wait_command();
-    bool try_command();
-    bool try_command_for(const std::chrono::milliseconds &rel_time);
-    void release();
-
-  private:
-    // Released after command is completed
-    std::binary_semaphore request_smph;
-};
-
-class Request : public Command
-{
-  public:
-    Request() = default;
-    bool result() const;
-
-  protected:
-    // Derived classes should use this mutex to avoid data races
-    std::mutex request_lock;
-    std::atomic<bool> result_ = false;
-};
-
 class TaskPool
 {
   public:
@@ -101,6 +72,38 @@ class TaskPool
   private:
     std::shared_mutex tasks_lock;
     std::map<std::string, std::unique_ptr<Task>> tasks;
+};
+
+class Command
+{
+  public:
+    Command();
+    virtual ~Command() = default;
+    void execute_dec(Task &task);
+    virtual void execute(Task &task) = 0;
+    void wait_command();
+    bool try_command();
+    bool try_command_for(const std::chrono::milliseconds &rel_time);
+    void release();
+    bool result() const;
+
+  protected:
+    std::atomic<bool> result_ = false;
+
+  private:
+    // Released after command is completed
+    std::binary_semaphore completion_smph;
+};
+
+// Unlike the Command class, it is assumed that the sender expects to receive data
+class Request : public Command
+{
+  public:
+    Request() = default;
+
+  protected:
+    // Derived classes should use this mutex to avoid data races
+    std::mutex request_lock;
 };
 
 } // namespace ybotln

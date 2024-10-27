@@ -249,7 +249,7 @@ void TaskPool::add_command_to(std::string name, std::shared_ptr<Command> command
 
 /**************************** Command interface ****************************/
 
-Command::Command() : request_smph{0} {}
+Command::Command() : completion_smph{0} {}
 
 void Command::execute_dec(Task &task)
 {
@@ -266,25 +266,25 @@ void Command::execute_dec(Task &task)
 
 void Command::wait_command()
 {
-    request_smph.acquire();
+    completion_smph.acquire();
 }
 
 bool Command::try_command()
 {
-    return request_smph.try_acquire();
+    return completion_smph.try_acquire();
 }
 
 bool Command::try_command_for(const std::chrono::milliseconds &rel_time)
 {
-    return request_smph.try_acquire_for(rel_time);
+    return completion_smph.try_acquire_for(rel_time);
 }
 
 void Command::release()
 {
-    request_smph.release();
+    completion_smph.release();
 }
 
-bool Request::result() const
+bool Command::result() const
 {
     return result_;
 }

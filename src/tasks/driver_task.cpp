@@ -141,6 +141,7 @@ void RouteCommand::execute(Task &task)
 {
     DriverTask &driver_task = dynamic_cast<DriverTask &>(task);
     driver_task.add_route_steps(std::move(new_route), reset_route);
+    result_ = true;
 }
 
 void RouteCommand::add_step(const RouteStep &step)
