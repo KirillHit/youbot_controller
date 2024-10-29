@@ -47,6 +47,7 @@ void Task::task_dec()
         LOGGER_STREAM(MSG_LVL::ERROR,
                       "The task " << log_name() << " terminated with exception: " << e.what());
     }
+    release_commands();
     LOGGER_STREAM(MSG_LVL::INFO, "The task " << log_name() << " completed");
 }
 

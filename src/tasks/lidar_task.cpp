@@ -62,6 +62,8 @@ bool LidarTask::get_distance(std::vector<long> &data, long &time_stamp)
     if (!urg.get_distance(data, &time_stamp))
     {
         LOGGER_STREAM(MSG_LVL::ERROR, "Failed to get data from lidar! Error text: " << urg.what());
+        urg.close();
+        lidar_alive = false;
         return false;
     }
     return true;

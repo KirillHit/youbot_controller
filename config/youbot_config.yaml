@@ -8,5 +8,5 @@ tcp_server:
   port: 10000
   timeout: 500          # ms
 lidar:
-  device_name: "/dev/ttyACM0"
+  device_name: "/dev/ttyACM1"
   baudrate: 115200

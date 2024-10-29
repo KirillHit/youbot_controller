@@ -61,8 +61,8 @@ bool DriverTask::get_odom(double &longitudinal, double &transversal, double &ang
     quantity<si::plane_angle> angular_si;
     driver->getBasePosition(longitudinal_si, transversal_si, angular_si);
     longitudinal = quantity_cast<double>(longitudinal_si);
-    transversal = quantity_cast<double>(longitudinal_si);
-    angular = quantity_cast<double>(longitudinal_si);
+    transversal = quantity_cast<double>(transversal_si);
+    angular = quantity_cast<double>(angular_si);
     return true;
 }
 
