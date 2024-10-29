@@ -14,10 +14,6 @@ DriverTask::DriverTask(std::string name) : Task(name)
 
 DriverTask::~DriverTask()
 {
-    if (!driver)
-    {
-        return;
-    }
     stop();
 }
 
@@ -29,6 +25,10 @@ void DriverTask::update_parameters()
 void DriverTask::set_speed(const double &longitudinal_vel, const double &transversal_vel,
                            const double &angular_vel)
 {
+    if (!driver)
+    {
+        return;
+    }
     quantity<si::velocity> longitudinalVelocity =
         std::clamp(longitudinal_vel, -max_leaner_vel, max_leaner_vel) * meter_per_second;
     quantity<si::velocity> transversalVelocity =
@@ -39,6 +39,10 @@ void DriverTask::set_speed(const double &longitudinal_vel, const double &transve
 
 void DriverTask::stop()
 {
+    if (!driver)
+    {
+        return;
+    }
     youbot::JointVelocitySetpoint setVel;
     setVel.angularVelocity = 0 * radian_per_second;
     driver->getBaseJoint(1).setData(setVel);
