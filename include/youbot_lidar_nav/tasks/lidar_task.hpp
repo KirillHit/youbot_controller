@@ -32,7 +32,6 @@ class LidarTask : public Task
     qrk::Urg_driver urg;
     std::string device_name;
     int baudrate;
-    int reconnect_delay = 5000; // ms
     bool lidar_alive = false;
 };
 
