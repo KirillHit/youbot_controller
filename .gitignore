@@ -11,7 +11,5 @@ CTestTestfile.cmake
 _deps
 CMakeUserPresets.json
 
-
-.vscode
 log
 build

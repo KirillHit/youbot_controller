@@ -1,0 +1,9 @@
+{
+    "TARGET_IP": "192.168.2.101",
+    "DEBUG_PORT": "6666",
+    "SRC_DIR": "${workspaceFolder}/build/src/",
+    "BINARY": "youbot_lidar_nav",
+    "DEST_DIR": "~",
+    "USER": "ubuntu",
+    "PASS": "1234",
+}

@@ -1,0 +1,84 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "cmake",
+            "label": "local configure",
+            "command": "configure",
+            "targets": [
+                "all"
+            ],
+            "preset": "local",
+            "problemMatcher": [],
+            "detail": "CMake template configure task"
+        },
+        {
+            "type": "cmake",
+            "label": "local build",
+            "command": "build",
+            "targets": [
+                "youbot_lidar_nav"
+            ],
+            "group": "build",
+            "problemMatcher": [],
+            "detail": "CMake template build task",
+            "dependsOn": [
+                "local configure"
+            ]
+        },
+        {
+            "type": "cmake",
+            "label": "cross configure",
+            "command": "configure",
+            "targets": [
+                "youbot_lidar_nav"
+            ],
+            "preset": "youbot",
+            "problemMatcher": [],
+            "detail": "CMake template configure task",
+        },
+        {
+            "type": "cmake",
+            "label": "cross build",
+            "command": "build",
+            "targets": [
+                "youbot_lidar_nav"
+            ],
+            "group": "build",
+            "problemMatcher": [],
+            "detail": "CMake template build task",
+            "dependsOn": [
+                "cross configure"
+            ]
+        },
+        {
+            "label": "deploy",
+            "isBackground": true,
+            "type": "shell",
+            "command": "sh",
+            "args": [
+                "deploy.sh",
+                "${config:TARGET_IP}",
+                "${config:DEBUG_PORT}",
+                "${config:SRC_DIR}",
+                "${config:BINARY}",
+                "${config:DEST_DIR}",
+                "${config:USER}",
+                "${config:PASS}",
+            ],
+            "problemMatcher": {
+                "base": "$gcc",
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "${config:BINARY}",
+                    "endsPattern": "Listening on port [0-9]{4}"
+                }
+            },
+            "dependsOn": [
+                "cross build"
+            ]
+        }
+    ]
+}
