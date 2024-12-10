@@ -1,24 +1,23 @@
 #ifndef TCP_SERVER_TASK_HPP
 #define TCP_SERVER_TASK_HPP
 
+#include "simple_socket/simple_socket.hpp"
+#include "youbot_lidar_nav/utils/task_pool.hpp"
+
 #include <cstdint>
 #include <string>
 #include <vector>
 
-#include "simple_socket/simple_socket.hpp"
-#include "youbot_lidar_nav/utils/task_pool.hpp"
-
-namespace ybotln
-{
+namespace ybotln {
 
 class TcpServerTask : public Task
 {
-  public:
+public:
     TcpServerTask(std::string name);
     ~TcpServerTask() = default;
     void update_parameters();
 
-  private:
+private:
     void task() override;
     void start_server();
     void receive();
@@ -33,6 +32,6 @@ class TcpServerTask : public Task
     bool con_alive = false;
 };
 
-} // namespace ybotln
+}  // namespace ybotln
 
 #endif

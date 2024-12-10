@@ -1,9 +1,9 @@
 #include "youbot_lidar_nav/tasks/lidar_task.hpp"
+
 #include "youbot_lidar_nav/utils/logger.hpp"
 #include "youbot_lidar_nav/utils/parameter_server.hpp"
 
-namespace ybotln
-{
+namespace ybotln {
 
 LidarTask::LidarTask(std::string name) : Task(name)
 {
@@ -20,8 +20,9 @@ bool LidarTask::connect_lidar()
 {
     if (!urg.open(device_name.c_str(), static_cast<long>(baudrate), qrk::Urg_driver::Serial))
     {
-        LOGGER_STREAM(MSG_LVL::ERROR, "Failed to connect to lidar via "
-                                          << device_name << "! Error text: " << urg.what());
+        LOGGER_STREAM(
+            MSG_LVL::ERROR,
+            "Failed to connect to lidar via " << device_name << "! Error text: " << urg.what());
         return false;
     }
     if (!urg.set_scanning_parameter(urg.deg2step(-90), urg.deg2step(+90)))
@@ -45,7 +46,7 @@ void LidarTask::task()
     }
 }
 
-bool LidarTask::get_distance(std::vector<long> &data, long &time_stamp)
+bool LidarTask::get_distance(std::vector<long>& data, long& time_stamp)
 {
     if (!lidar_alive)
     {
@@ -65,18 +66,18 @@ bool LidarTask::get_distance(std::vector<long> &data, long &time_stamp)
 
 /**************************** Command interface ****************************/
 
-void GetDistanceRequest::execute(Task &task)
+void GetDistanceRequest::execute(Task& task)
 {
     std::lock_guard<std::mutex> lock(request_lock);
-    LidarTask &lidar_task = dynamic_cast<LidarTask &>(task);
+    LidarTask& lidar_task = dynamic_cast<LidarTask&>(task);
     result_ = lidar_task.get_distance(data_, time_stamp_);
 }
 
-void GetDistanceRequest::data(std::vector<long> &data, long &time_stamp)
+void GetDistanceRequest::data(std::vector<long>& data, long& time_stamp)
 {
     std::lock_guard<std::mutex> lock(request_lock);
     data.swap(data_);
     time_stamp = time_stamp_;
 }
 
-} // namespace ybotln
+}  // namespace ybotln

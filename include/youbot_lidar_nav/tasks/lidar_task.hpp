@@ -1,18 +1,17 @@
 #ifndef LIDAR_TASK_HPP
 #define LIDAR_TASK_HPP
 
-#include <string>
-#include <vector>
-
 #include "Urg_driver.h"
 #include "youbot_lidar_nav/utils/task_pool.hpp"
 
-namespace ybotln
-{
+#include <string>
+#include <vector>
+
+namespace ybotln {
 
 class LidarTask : public Task
 {
-  public:
+public:
     LidarTask(std::string name);
     ~LidarTask() = default;
     void update_parameters();
@@ -24,9 +23,9 @@ class LidarTask : public Task
      * @param data Distance data array [mm]
      * @param time_stamp Timestamp [msec]
      */
-    bool get_distance(std::vector<long> &data, long &time_stamp);
+    bool get_distance(std::vector<long>& data, long& time_stamp);
 
-  private:
+private:
     void task() override;
 
     qrk::Urg_driver urg;
@@ -37,16 +36,16 @@ class LidarTask : public Task
 
 class GetDistanceRequest : public Request
 {
-  public:
+public:
     GetDistanceRequest() = default;
-    void execute(Task &task) override;
-    void data(std::vector<long> &data, long &time_stamp);
+    void execute(Task& task) override;
+    void data(std::vector<long>& data, long& time_stamp);
 
-  private:
+private:
     std::vector<long> data_;
     long time_stamp_;
 };
 
-} // namespace ybotln
+}  // namespace ybotln
 
 #endif

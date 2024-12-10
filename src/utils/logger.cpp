@@ -1,24 +1,24 @@
+#include "youbot_lidar_nav/utils/logger.hpp"
+
+#include "youbot_lidar_nav/utils/parameter_server.hpp"
+
 #include <chrono>
 #include <format>
 #include <string>
 
-#include "youbot_lidar_nav/utils/logger.hpp"
-#include "youbot_lidar_nav/utils/parameter_server.hpp"
-
 #define RESET "\033[0m"
-#define BLACK "\033[30m"   /* Black */
-#define RED "\033[31m"     /* Red */
-#define GREEN "\033[32m"   /* Green */
-#define YELLOW "\033[33m"  /* Yellow */
-#define BLUE "\033[34m"    /* Blue */
+#define BLACK "\033[30m" /* Black */
+#define RED "\033[31m" /* Red */
+#define GREEN "\033[32m" /* Green */
+#define YELLOW "\033[33m" /* Yellow */
+#define BLUE "\033[34m" /* Blue */
 #define MAGENTA "\033[35m" /* Magenta */
-#define CYAN "\033[36m"    /* Cyan */
-#define WHITE "\033[37m"   /* White */
+#define CYAN "\033[36m" /* Cyan */
+#define WHITE "\033[37m" /* White */
 
-namespace ybotln
-{
+namespace ybotln {
 
-Logger &Logger::get_logger()
+Logger& Logger::get_logger()
 {
     static Logger single_instance;
     return single_instance;
@@ -33,7 +33,7 @@ void Logger::update_parameters()
     save = PARAMETERS.get<bool>("logger/save");
 }
 
-void Logger::operator()(const MSG_LVL &lvl, const std::string &str)
+void Logger::operator()(const MSG_LVL& lvl, const std::string& str)
 {
     if ((lvl == MSG_LVL::DEBUG) && !debug)
     {
@@ -69,4 +69,4 @@ std::string Logger::get_time()
     return oss.str();
 }
 
-} // namespace ybotln
+}  // namespace ybotln

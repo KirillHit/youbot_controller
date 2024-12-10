@@ -1,14 +1,14 @@
-#include <chrono>
-#include <memory>
+#include "youbot_lidar_nav/tasks/planner_task.hpp"
 
 #include "youbot_lidar_nav/tasks/driver_task.hpp"
 #include "youbot_lidar_nav/tasks/lidar_task.hpp"
-#include "youbot_lidar_nav/tasks/planner_task.hpp"
 #include "youbot_lidar_nav/utils/logger.hpp"
 #include "youbot_lidar_nav/utils/parameter_server.hpp"
 
-namespace ybotln
-{
+#include <chrono>
+#include <memory>
+
+namespace ybotln {
 
 PlannerTask::PlannerTask(std::string name) : Task(name)
 {
@@ -50,4 +50,4 @@ void PlannerTask::task()
     }
 }
 
-} // namespace ybotln
+}  // namespace ybotln

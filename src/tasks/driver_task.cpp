@@ -1,11 +1,11 @@
-#include <algorithm>
-
 #include "youbot_lidar_nav/tasks/driver_task.hpp"
+
 #include "youbot_lidar_nav/utils/logger.hpp"
 #include "youbot_lidar_nav/utils/parameter_server.hpp"
 
-namespace ybotln
-{
+#include <algorithm>
+
+namespace ybotln {
 
 DriverTask::DriverTask(std::string name) : Task(name)
 {
@@ -22,8 +22,9 @@ void DriverTask::update_parameters()
     max_leaner_vel = PARAMETERS.get<double>("driver/max_leaner_vel");
 }
 
-void DriverTask::set_speed(const double &longitudinal_vel, const double &transversal_vel,
-                           const double &angular_vel)
+void DriverTask::set_speed(const double& longitudinal_vel,
+                           const double& transversal_vel,
+                           const double& angular_vel)
 {
     if (!driver)
     {
@@ -51,7 +52,7 @@ void DriverTask::stop()
     driver->getBaseJoint(4).setData(setVel);
 }
 
-bool DriverTask::get_odom(double &longitudinal, double &transversal, double &angular)
+bool DriverTask::get_odom(double& longitudinal, double& transversal, double& angular)
 {
     if (!driver)
     {
@@ -66,8 +67,9 @@ bool DriverTask::get_odom(double &longitudinal, double &transversal, double &ang
     return true;
 }
 
-void DriverTask::set_odom(const double &longitudinal, const double &transversal,
-                          const double &angular)
+void DriverTask::set_odom(const double& longitudinal,
+                          const double& transversal,
+                          const double& angular)
 {
     quantity<si::length> longitudinal_si = longitudinal * meter;
     quantity<si::length> transversal_si = transversal * meter;
@@ -87,7 +89,7 @@ void DriverTask::task()
             driver->doJointCommutation();
             spin_route();
         }
-        catch (const std::runtime_error &e)
+        catch (const std::runtime_error& e)
         {
             driver.reset(nullptr);
             LOGGER_STREAM(MSG_LVL::ERROR, e.what());
@@ -125,7 +127,7 @@ void DriverTask::spin_route()
     }
 }
 
-void DriverTask::add_route_steps(std::queue<RouteStep> &&n_route, const bool reset)
+void DriverTask::add_route_steps(std::queue<RouteStep>&& n_route, const bool reset)
 {
     if (reset)
     {
@@ -141,14 +143,14 @@ void DriverTask::add_route_steps(std::queue<RouteStep> &&n_route, const bool res
 
 /**************************** Command interface ****************************/
 
-void RouteCommand::execute(Task &task)
+void RouteCommand::execute(Task& task)
 {
-    DriverTask &driver_task = dynamic_cast<DriverTask &>(task);
+    DriverTask& driver_task = dynamic_cast<DriverTask&>(task);
     driver_task.add_route_steps(std::move(new_route), reset_route);
     result_ = true;
 }
 
-void RouteCommand::add_step(const RouteStep &step)
+void RouteCommand::add_step(const RouteStep& step)
 {
     new_route.push(step);
 }
@@ -158,14 +160,14 @@ void RouteCommand::set_reset(const bool reset_flag)
     reset_route = reset_flag;
 }
 
-void GetOdomRequest::execute(Task &task)
+void GetOdomRequest::execute(Task& task)
 {
     std::lock_guard<std::mutex> lock(request_lock);
-    DriverTask &driver_task = dynamic_cast<DriverTask &>(task);
+    DriverTask& driver_task = dynamic_cast<DriverTask&>(task);
     result_ = driver_task.get_odom(longitudinal_, transversal_, angular_);
 }
 
-void GetOdomRequest::data(double &longitudinal, double &transversal, double &angular)
+void GetOdomRequest::data(double& longitudinal, double& transversal, double& angular)
 {
     std::lock_guard<std::mutex> lock(request_lock);
     longitudinal = longitudinal_;
@@ -173,4 +175,4 @@ void GetOdomRequest::data(double &longitudinal, double &transversal, double &ang
     angular = angular_;
 }
 
-} // namespace ybotln
+}  // namespace ybotln

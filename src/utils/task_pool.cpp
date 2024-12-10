@@ -1,15 +1,15 @@
+#include "youbot_lidar_nav/utils/task_pool.hpp"
+
+#include "youbot_lidar_nav/utils/logger.hpp"
+
 #include <format>
 #include <utility>
 
-#include "youbot_lidar_nav/utils/logger.hpp"
-#include "youbot_lidar_nav/utils/task_pool.hpp"
-
-namespace ybotln
-{
+namespace ybotln {
 
 /**************************** Task class ****************************/
 
-Task::Task(std::string name) : task_name{name}, command_smph{0} {}
+Task::Task(std::string name) : task_name {name}, command_smph {0} {}
 
 Task::~Task()
 {
@@ -30,7 +30,7 @@ std::string Task::log_name() const
     return std::format("\"{}\" [{}]", task_name, id.str());
 }
 
-void Task::set_task_poll(TaskPool *n_pool)
+void Task::set_task_poll(TaskPool* n_pool)
 {
     task_pool = n_pool;
 }
@@ -42,7 +42,7 @@ void Task::task_dec()
     {
         task();
     }
-    catch (const std::exception &e)
+    catch (const std::exception& e)
     {
         LOGGER_STREAM(MSG_LVL::ERROR,
                       "The task " << log_name() << " terminated with exception: " << e.what());
@@ -59,7 +59,7 @@ void Task::start()
         return;
     }
     stop_flag = false;
-    task_thread = std::thread{&Task::task_dec, this};
+    task_thread = std::thread {&Task::task_dec, this};
     running = true;
 }
 
@@ -120,7 +120,7 @@ bool Task::try_process_commands()
     return false;
 }
 
-bool Task::try_process_commands_for(const std::chrono::milliseconds &rel_time)
+bool Task::try_process_commands_for(const std::chrono::milliseconds& rel_time)
 {
     if (stop_flag)
     {
@@ -135,7 +135,7 @@ bool Task::try_process_commands_for(const std::chrono::milliseconds &rel_time)
 }
 
 template <typename _Clock, typename _Dur>
-bool Task::try_process_commands_until(const std::chrono::time_point<_Clock, _Dur> &time_point)
+bool Task::try_process_commands_until(const std::chrono::time_point<_Clock, _Dur>& time_point)
 {
     if (stop_flag)
     {
@@ -149,11 +149,11 @@ bool Task::try_process_commands_until(const std::chrono::time_point<_Clock, _Dur
     return false;
 }
 template bool Task::try_process_commands_until(
-    const std::chrono::time_point<std::chrono::steady_clock, std::chrono::steady_clock::duration>
-        &time_point);
+    const std::chrono::time_point<std::chrono::steady_clock, std::chrono::steady_clock::duration>&
+        time_point);
 template bool Task::try_process_commands_until(
-    const std::chrono::time_point<std::chrono::system_clock, std::chrono::system_clock::duration>
-        &time_point);
+    const std::chrono::time_point<std::chrono::system_clock, std::chrono::system_clock::duration>&
+        time_point);
 
 void Task::process_commands()
 {
@@ -204,7 +204,7 @@ void TaskPool::stop(const std::string name)
 void TaskPool::start_all()
 {
     std::shared_lock<std::shared_mutex> lock(tasks_lock);
-    for (auto const &[key, val] : tasks)
+    for (auto const& [key, val] : tasks)
     {
         val->start();
     }
@@ -213,17 +213,17 @@ void TaskPool::start_all()
 void TaskPool::stop_all()
 {
     std::shared_lock<std::shared_mutex> lock(tasks_lock);
-    for (auto const &[key, val] : tasks)
+    for (auto const& [key, val] : tasks)
     {
         val->stop();
     }
-    for (auto const &[key, val] : tasks)
+    for (auto const& [key, val] : tasks)
     {
         val->join();
     }
 }
 
-void TaskPool::add_task(std::unique_ptr<Task> &&task)
+void TaskPool::add_task(std::unique_ptr<Task>&& task)
 {
     std::unique_lock<std::shared_mutex> lock(tasks_lock);
     std::string name = task->get_name();
@@ -250,15 +250,15 @@ void TaskPool::add_command_to(std::string name, std::shared_ptr<Command> command
 
 /**************************** Command interface ****************************/
 
-Command::Command() : completion_smph{0} {}
+Command::Command() : completion_smph {0} {}
 
-void Command::execute_dec(Task &task)
+void Command::execute_dec(Task& task)
 {
     try
     {
         execute(task);
     }
-    catch (const std::bad_cast &e)
+    catch (const std::bad_cast& e)
     {
         LOGGER_STREAM(MSG_LVL::ERROR, "The task received an unexpected command!");
     }
@@ -275,7 +275,7 @@ bool Command::try_command()
     return completion_smph.try_acquire();
 }
 
-bool Command::try_command_for(const std::chrono::milliseconds &rel_time)
+bool Command::try_command_for(const std::chrono::milliseconds& rel_time)
 {
     return completion_smph.try_acquire_for(rel_time);
 }
@@ -290,4 +290,4 @@ bool Command::result() const
     return result_;
 }
 
-} // namespace ybotln
+}  // namespace ybotln

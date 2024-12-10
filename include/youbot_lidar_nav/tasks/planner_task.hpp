@@ -3,21 +3,20 @@
 
 #include "youbot_lidar_nav/utils/task_pool.hpp"
 
-namespace ybotln
-{
+namespace ybotln {
 
 class PlannerTask : public Task
 {
-  public:
+public:
     PlannerTask(std::string name);
     ~PlannerTask() = default;
     void update_parameters();
 
-  private:
+private:
     void task() override;
     void spin_route();
 };
 
-} // namespace ybotln
+}  // namespace ybotln
 
 #endif

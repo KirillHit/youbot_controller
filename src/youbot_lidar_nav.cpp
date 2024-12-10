@@ -1,10 +1,3 @@
-#include <chrono>
-#include <csignal>
-#include <iostream>
-#include <semaphore>
-#include <thread>
-#include <vector>
-
 #include "yaml-cpp/yaml.h"
 #include "youbot_lidar_nav/tasks/driver_task.hpp"
 #include "youbot_lidar_nav/tasks/lidar_task.hpp"
@@ -13,6 +6,13 @@
 #include "youbot_lidar_nav/utils/logger.hpp"
 #include "youbot_lidar_nav/utils/parameter_server.hpp"
 #include "youbot_lidar_nav/utils/task_pool.hpp"
+
+#include <chrono>
+#include <csignal>
+#include <iostream>
+#include <semaphore>
+#include <thread>
+#include <vector>
 
 using namespace ybotln;
 
@@ -69,7 +69,7 @@ int main()
     {
         load_config();
     }
-    catch (const std::runtime_error &e)
+    catch (const std::runtime_error& e)
     {
         LOGGER_STREAM(MSG_LVL::ERROR, "Failed to load parameters! " << e.what());
     }

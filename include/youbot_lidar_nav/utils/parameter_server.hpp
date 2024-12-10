@@ -6,19 +6,18 @@
 
 #define PARAMETERS ybotln::ParameterServer::get_parameters()
 
-namespace ybotln
-{
+namespace ybotln {
 
 class ParameterServer
 {
-  public:
-    static ParameterServer &get_parameters()
+public:
+    static ParameterServer& get_parameters()
     {
         static ParameterServer single_instance;
         return single_instance;
     };
     template <class T>
-    const T &get(const std::string name)
+    const T& get(const std::string name)
     {
         return get_params_map<T>()[name];
     }
@@ -33,18 +32,18 @@ class ParameterServer
         return get_params_map<T>().contains(name);
     }
 
-  private:
+private:
     ParameterServer() = default;
-    ParameterServer(const ParameterServer &root) = delete;
-    ParameterServer &operator=(const ParameterServer &) = delete;
+    ParameterServer(const ParameterServer& root) = delete;
+    ParameterServer& operator=(const ParameterServer&) = delete;
     template <class T>
-    std::map<std::string, T> &get_params_map()
+    std::map<std::string, T>& get_params_map()
     {
         static std::map<std::string, T> parameters;
         return parameters;
     }
 };
 
-} // namespace ybotln
+}  // namespace ybotln
 
-#endif // PARAMETER_SERVER_HPP
+#endif  // PARAMETER_SERVER_HPP
