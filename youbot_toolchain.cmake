@@ -6,7 +6,7 @@ set(CMAKE_C_COMPILER   gcc)
 set(CMAKE_CXX_COMPILER g++)
 
 # where is the target environment located
-set(CMAKE_FIND_ROOT_PATH )
+set(CMAKE_FIND_ROOT_PATH "/usr/bin")
 
 # adjust the default behavior of the FIND_XXX() commands:
 # search programs in the host environment

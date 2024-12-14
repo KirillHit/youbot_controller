@@ -2,23 +2,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Local Debug",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${config:SRC_DIR}/${config:BINARY}",
-            "args": [],
-            "stopAtEntry": true,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "setupCommands": [],
-            "preLaunchTask": "local build",
-            "linux": {
-                "MIMode": "gdb",
-                "miDebuggerPath": "/usr/bin/gdb"
-            },
-        },
-        {
             "name": "Remote Debug",
             "type": "cppdbg",
             "request": "launch",

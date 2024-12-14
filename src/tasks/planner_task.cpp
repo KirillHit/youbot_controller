@@ -35,14 +35,20 @@ void PlannerTask::task()
             std::vector<long> data;
             long time_stamp;
             distant_request->data(data, time_stamp);
+            LOGGER_STREAM(MSG_LVL::DEBUG, time_stamp << " : " << data.size());
+        }
+        else
+        {
             LOGGER_STREAM(MSG_LVL::ERROR, "Failed to get data from lidar!");
-            LOGGER_STREAM(MSG_LVL::DEBUG, time_stamp << " : " << data.size() << " : ");
         }
 
         if (odom_request->result())
         {
             double longitudinal, transversal, angular;
             odom_request->data(longitudinal, transversal, angular);
+        }
+        else
+        {
             LOGGER_STREAM(MSG_LVL::ERROR, "Failed to get data from driver!");
         }
 

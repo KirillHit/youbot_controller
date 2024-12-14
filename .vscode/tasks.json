@@ -5,39 +5,12 @@
     "tasks": [
         {
             "type": "cmake",
-            "label": "local configure",
-            "command": "configure",
-            "targets": [
-                "all"
-            ],
-            "preset": "local",
-            "problemMatcher": [],
-            "detail": "CMake template configure task"
-        },
-        {
-            "type": "cmake",
-            "label": "local build",
-            "command": "build",
-            "targets": [
-                "youbot_lidar_nav"
-            ],
-            "group": "build",
-            "problemMatcher": [],
-            "detail": "CMake template build task",
-            "dependsOn": [
-                "local configure"
-            ]
-        },
-        {
-            "type": "cmake",
             "label": "cross configure",
             "command": "configure",
             "targets": [
                 "youbot_lidar_nav"
             ],
             "preset": "youbot",
-            "problemMatcher": [],
-            "detail": "CMake template configure task",
         },
         {
             "type": "cmake",
@@ -47,8 +20,6 @@
                 "youbot_lidar_nav"
             ],
             "group": "build",
-            "problemMatcher": [],
-            "detail": "CMake template build task",
             "dependsOn": [
                 "cross configure"
             ]

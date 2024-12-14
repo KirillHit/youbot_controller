@@ -25,7 +25,7 @@ bool LidarTask::connect_lidar()
             "Failed to connect to lidar via " << device_name << "! Error text: " << urg.what());
         return false;
     }
-    if (!urg.set_scanning_parameter(urg.deg2step(-90), urg.deg2step(+90)))
+    if (!urg.set_scanning_parameter(urg.deg2step(-90), urg.deg2step(90)))
     {
         LOGGER_STREAM(MSG_LVL::ERROR, "Failed to set lidar parameters! Error text: " << urg.what());
         return false;
@@ -50,11 +50,12 @@ bool LidarTask::get_distance(std::vector<long>& data, long& time_stamp)
 {
     if (!lidar_alive)
     {
-        LOGGER_STREAM(MSG_LVL::ERROR, "Lidar is dead 0_0");
+        LOGGER_STREAM(MSG_LVL::WARN, "Lidar is dead 0_0");
         return false;
     }
-    if (!urg.start_measurement(qrk::Urg_driver::Distance, 1) ||
-        !urg.get_distance(data, &time_stamp))
+    bool res =
+        urg.start_measurement(qrk::Urg_driver::Distance, 1) & urg.get_distance(data, &time_stamp);
+    if (!res)
     {
         LOGGER_STREAM(MSG_LVL::ERROR, "Failed to get data from lidar! Error text: " << urg.what());
         urg.close();
