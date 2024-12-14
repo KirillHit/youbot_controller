@@ -32,7 +32,7 @@ struct RouteStepMsg
 };
 #pragma pack(pop)
 constexpr size_t ROUTE_STEP_SIZE = sizeof(RouteStepMsg);
-constexpr size_t MAX_ROUTE_STEPS = 32;
+constexpr size_t MAX_ROUTE_STEPS = 1;
 
 constexpr size_t TX_MSG_SIZE = MAX_ROUTE_STEPS * ROUTE_STEP_SIZE + 3;
 constexpr size_t RX_MSG_SIZE = 24;

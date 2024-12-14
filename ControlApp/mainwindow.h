@@ -51,6 +51,8 @@ class MainWindow : public QMainWindow
     void displayNetError(QAbstractSocket::SocketError socketError);
     void disconnectedHandle();
 
+    void sendRouteMsg(const std::vector<RouteStep>::const_iterator begin,
+                      const std::vector<RouteStep>::const_iterator end, bool reset);
     void sendRoute(const std::vector<RouteStep> &route_list);
     void sendStop();
 

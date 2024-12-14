@@ -74,32 +74,42 @@ void MainWindow::sendTcp(const size_t msg_size)
     tcpSocket->write(reinterpret_cast<char *>(txBuffer.data()), msg_size);
 }
 
-void MainWindow::sendRoute(const std::vector<RouteStep> &route_list)
+
+void MainWindow::sendRouteMsg(const std::vector<RouteStep>::const_iterator begin,
+                              const std::vector<RouteStep>::const_iterator end, bool reset)
 {
+    ptrdiff_t num_step = std::distance(begin, end);
+    if (num_step <= 0)
+    {
+        qWarning("Incorrect iterators");
+        return;
+    }
     txBuffer[0] = static_cast<uint8_t>(DataId::GO_ROUTE);
     RouteMsgHeader *route_header = reinterpret_cast<RouteMsgHeader *>(&txBuffer[1]);
+    route_header->reset_route = reset;
+    route_header->step_count = std::min(static_cast<size_t>(num_step), MAX_ROUTE_STEPS);
+
     RouteStepMsg *step_msg = reinterpret_cast<RouteStepMsg *>(&txBuffer[3]);
-    route_header->reset_route = 1;
-    size_t step_count = 0;
-    for (const auto &step : route_list)
-    {
-        step_msg->longitudinal_vel = static_cast<int16_t>(step.longitudinal_vel * 1000);
-        step_msg->transversal_vel = static_cast<int16_t>(step.transversal_vel * 1000);
-        step_msg->angular_vel = static_cast<int16_t>(step.angular_vel * 1000);
-        step_msg->duration = static_cast<int16_t>(step.duration);
-        ++step_msg;
-        ++step_count;
-        if (step_count >= MAX_ROUTE_STEPS)
-        {
-            route_header->step_count = MAX_ROUTE_STEPS;
-            sendTcp(TX_MSG_SIZE);
-            route_header->reset_route = 0;
-            step_count = 0;
-        }
+    auto step = begin;
+    for (size_t step_idx = 0; step_idx < route_header->step_count; ++step_idx, ++step_msg, ++step) {
+        step_msg->longitudinal_vel = static_cast<int16_t>(step->longitudinal_vel * 1000);
+        step_msg->transversal_vel = static_cast<int16_t>(step->transversal_vel * 1000);
+        step_msg->angular_vel = static_cast<int16_t>(step->angular_vel * 1000);
+        step_msg->duration = static_cast<int16_t>(step->duration);
     }
-    size_t msg_size = route_list.size() % MAX_ROUTE_STEPS;
-    route_header->step_count = static_cast<uint8_t>(msg_size);
+
     sendTcp(TX_MSG_SIZE);
+}
+
+
+void MainWindow::sendRoute(const std::vector<RouteStep> &route_list)
+{
+    size_t num_msg = 1 + ((route_list.size() - 1) / MAX_ROUTE_STEPS);
+    auto step = route_list.begin();
+    for (size_t msg_idx = 0; msg_idx < num_msg; ++msg_idx, step+=MAX_ROUTE_STEPS)
+    {
+        sendRouteMsg(step, route_list.end(), !static_cast<bool>(msg_idx));
+    }
 }
 
 void MainWindow::sendStop()
