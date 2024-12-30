@@ -3,6 +3,7 @@
 #include "youbot_lidar_nav/utils/parameter_server.hpp"
 
 #include <chrono>
+#include <filesystem>
 #include <format>
 #include <string>
 
@@ -24,13 +25,33 @@ Logger& Logger::get_logger()
     return single_instance;
 }
 
-Logger::Logger() {}
-
-void Logger::update_parameters()
+void Logger::set_debug(bool flag)
 {
-    debug = PARAMETERS.get<bool>("logger/debug");
-    save_path = PARAMETERS.get<std::string>("logger/save_path");
-    save = PARAMETERS.get<bool>("logger/save");
+    debug = flag;
+}
+
+void Logger::set_save(bool flag)
+{
+    if (!flag)
+    {
+        if (out_file.is_open())
+            out_file.close();
+        save = false;
+        return;
+    }
+
+    std::filesystem::create_directories("log");
+    std::string file = "log/" + std::format("{0:%F_%R}", std::chrono::system_clock::now()) + ".log";
+    out_file.open(file);
+    if (!out_file.is_open())
+    {
+        out_file.close();
+        this->operator()(MSG_LVL::ERROR, "Failed to open file: " + file + " !");
+        return;
+    }
+
+    save = true;
+    this->operator()(MSG_LVL::INFO, "Recording logs to file: " + file);
 }
 
 void Logger::operator()(const MSG_LVL& lvl, const std::string& str)
@@ -50,7 +71,7 @@ void Logger::operator()(const MSG_LVL& lvl, const std::string& str)
 
     if (save)
     {
-        // TODO
+        out_file << log_str << std::endl;
     }
 }
 

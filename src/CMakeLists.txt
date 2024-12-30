@@ -27,8 +27,3 @@ target_sources(
     tasks/planner_task.cpp
     youbot_lidar_nav.cpp
 )
-
-install(
-  TARGETS
-    youbot_lidar_nav
-  DESTINATION bin)

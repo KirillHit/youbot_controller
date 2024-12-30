@@ -9,6 +9,7 @@
 
 #include <chrono>
 #include <csignal>
+#include <filesystem>
 #include <iostream>
 #include <semaphore>
 #include <thread>
@@ -26,8 +27,7 @@ void sigint_handler(int signal)
 void default_parameters()
 {
     PARAMETERS.set<bool>("logger/debug", false);
-    PARAMETERS.set<bool>("logger/save_path", false);
-    PARAMETERS.set<std::string>("logger/save", "");
+    PARAMETERS.set<bool>("logger/save", false);
     PARAMETERS.set<double>("driver/max_leaner_vel", 0.5);
     PARAMETERS.set<int>("tcp_server/port", 10000);
     PARAMETERS.set<int>("tcp_server/timeout", 500);
@@ -37,14 +37,13 @@ void default_parameters()
 
 void load_config()
 {
-    std::string config_path = std::string(SOURCE_DIR) + "config/youbot_config.yaml";
+    std::string config_path = "config/youbot_config.yaml";
 
     LOGGER_STREAM(MSG_LVL::INFO, "Loading parameters from file \"" << config_path << "\"...");
 
     YAML::Node config = YAML::LoadFile(config_path);
 
     PARAMETERS.set("logger/debug", config["logger"]["debug"].as<bool>());
-    PARAMETERS.set("logger/save_path", config["logger"]["save_path"].as<std::string>());
     PARAMETERS.set("logger/save", config["logger"]["save"].as<bool>());
     PARAMETERS.set("driver/max_leaner_vel", config["driver"]["max_leaner_vel"].as<double>());
     PARAMETERS.set("tcp_server/port", config["tcp_server"]["port"].as<int>());
@@ -63,6 +62,10 @@ int main()
 
     signal(SIGINT, sigint_handler);
 
+    auto source_dir = std::filesystem::path(std::string(SOURCE_DIR));
+    if (std::filesystem::exists(source_dir))
+        std::filesystem::current_path(source_dir);
+
     default_parameters();
 
     try
@@ -74,7 +77,8 @@ int main()
         LOGGER_STREAM(MSG_LVL::ERROR, "Failed to load parameters! " << e.what());
     }
 
-    Logger::get_logger().update_parameters();
+    Logger::get_logger().set_debug(PARAMETERS.get<bool>("logger/debug"));
+    Logger::get_logger().set_save(PARAMETERS.get<bool>("logger/save"));
 
     TaskPool task_pool;
 

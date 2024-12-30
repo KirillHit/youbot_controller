@@ -1,7 +1,6 @@
 logger:
   debug: true           # output debug information
   save: true            # write data to file
-  save_path: ""         # default: source_dir/log/<timestamp>.log
 driver:
   max_leaner_vel: 0.5   # m/s
 tcp_server:

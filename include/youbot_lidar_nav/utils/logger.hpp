@@ -2,6 +2,7 @@
 #define LOGGER_HPP
 
 #include <cstdint>
+#include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -31,17 +32,18 @@ class Logger
 public:
     static Logger& get_logger();
     void operator()(const MSG_LVL& lvl, const std::string& str);
-    void update_parameters();
+    void set_debug(bool flag);
+    void set_save(bool flag);
 
 private:
-    Logger();
+    Logger() = default;
     Logger(const Logger& root) = delete;
     Logger& operator=(const Logger&) = delete;
     std::string get_time();
 
     bool debug = false;
     bool save = false;
-    std::string save_path;
+    std::ofstream out_file;
 };
 
 }  // namespace ybotln
