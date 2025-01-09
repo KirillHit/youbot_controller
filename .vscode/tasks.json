@@ -38,6 +38,7 @@
                 "${config:DEST_DIR}",
                 "${config:USER}",
                 "${config:PASS}",
+                "${config:CFG_DIR}",
             ],
             "problemMatcher": {
                 "base": "$gcc",
