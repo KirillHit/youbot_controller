@@ -23,7 +23,7 @@ public:
      * @param data Distance data array [mm]
      * @param time_stamp Timestamp [msec]
      */
-    bool get_distance(std::vector<long>& data, long& time_stamp);
+    bool get_distance(std::vector<long>& data, std::vector<double> radian, long& time_stamp);
 
 private:
     void task() override;
@@ -31,6 +31,7 @@ private:
     qrk::Urg_driver urg;
     std::string device_name;
     int baudrate;
+    double viewing_angle;
     bool lidar_alive = false;
 };
 
@@ -39,10 +40,11 @@ class GetDistanceRequest : public Request
 public:
     GetDistanceRequest() = default;
     void execute(Task& task) override;
-    void data(std::vector<long>& data, long& time_stamp);
+    void data(std::vector<long>& length, std::vector<double> radian, long& time_stamp);
 
 private:
-    std::vector<long> data_;
+    std::vector<long> length_;
+    std::vector<double> radian_;
     long time_stamp_;
 };
 

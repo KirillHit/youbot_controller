@@ -32,10 +32,11 @@ void PlannerTask::task()
 
         if (distant_request->result())
         {
-            std::vector<long> data;
+            std::vector<long> length;
+            std::vector<double> radian;
             long time_stamp;
-            distant_request->data(data, time_stamp);
-            LOGGER_STREAM(MSG_LVL::DEBUG, time_stamp << " : " << data.size());
+            distant_request->data(length, radian, time_stamp);
+            LOGGER_STREAM(MSG_LVL::DEBUG, time_stamp << " : " << length.size());
         }
         else
         {

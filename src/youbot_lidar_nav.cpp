@@ -33,6 +33,8 @@ void default_parameters()
     PARAMETERS.set<int>("tcp_server/timeout", 500);
     PARAMETERS.set<std::string>("lidar/device_name", "/dev/ttyACM0");
     PARAMETERS.set<int>("lidar/baudrate", 115200);
+    PARAMETERS.set<double>("lidar/viewing_angle", 90);
+    
 }
 
 void load_config()
