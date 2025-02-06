@@ -8,6 +8,6 @@
 [submodule "lib/urg_library"]
 	path = lib/urg_library
 	url = https://github.com/UrgNetwork/urg_library.git
-[submodule "lib/simple_socket"]
-	path = lib/simple_socket
-	url = https://github.com/KirillHit/simple_socket.git
+[submodule "lib/udp_streamer"]
+	path = lib/udp_streamer
+	url = https://github.com/KirillHit/udp_streamer.git

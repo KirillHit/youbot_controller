@@ -9,3 +9,11 @@ tcp_server:
 lidar:
   device_name: "/dev/ttyACM1"
   baudrate: 115200
+streamer:
+  server_ip: "127.0.0.1"
+  camera_dev: "/dev/video0"
+  quality: 70
+  interval: 50
+  pack_size: 4096
+  width: 720
+  height: 480
