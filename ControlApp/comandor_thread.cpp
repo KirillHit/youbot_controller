@@ -1,7 +1,8 @@
 #include "comandor_thread.h"
 
-ComandorThread::ComandorThread()
-    : tcpSocket(new QTcpSocket(this))
+ComandorThread::ComandorThread(QObject *parent)
+    : QThread(parent)
+    , tcpSocket(new QTcpSocket(this))
 {
     txBuffer.resize(TX_MSG_SIZE, 0);
     rxBuffer.resize(RX_MSG_SIZE);
@@ -89,4 +90,11 @@ void ComandorThread::sendStop()
     route_list[0].angular_vel = 0;
     route_list[0].duration = 0;
     sendRoute(route_list);
+}
+
+void ComandorThread::sendStreamSettings(const StreamSettings &settings)
+{
+    txBuffer[0] = static_cast<uint8_t>(DataId::SET_CAMERA);
+    std::memcpy(&txBuffer[1], &settings, sizeof(StreamSettings));
+    sendTcp();
 }

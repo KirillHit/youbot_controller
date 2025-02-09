@@ -22,11 +22,12 @@ class ComandorThread : public QThread
 {
     Q_OBJECT
 public:
-    ComandorThread();
+    ComandorThread(QObject *parent = nullptr);
     ~ComandorThread();
 
     void sendRoute(const std::vector<RouteStep> &route_list);
     void sendStop();
+    void sendStreamSettings(const StreamSettings &settings);
 
 public slots:
     void connectHost(const QString &host_ip, const quint16 &port);
