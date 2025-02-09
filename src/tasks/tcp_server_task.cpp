@@ -4,6 +4,7 @@
 #include "youbot_lidar_nav/tasks/driver_task.hpp"
 #include "youbot_lidar_nav/utils/logger.hpp"
 #include "youbot_lidar_nav/utils/parameter_server.hpp"
+#include "youbot_lidar_nav/tasks/streamer_task.hpp"
 
 namespace ybotln {
 
@@ -67,6 +68,11 @@ void TcpServerTask::receive()
             process_route();
             break;
         }
+        case static_cast<uint8_t>(DataId::SET_CAMERA):
+        {
+            process_stream();
+            break;
+        }
         default: LOGGER_STREAM(MSG_LVL::WARN, "Wrong data id"); break;
     }
 }
@@ -96,6 +102,14 @@ void TcpServerTask::process_route()
         cmd->add_step(std::move(step));
     }
     emit_command("driver", cmd);
+}
+
+void TcpServerTask::process_stream()
+{
+    auto cmd = std::make_shared<SettingsCommand>();
+    StreamSettings* settings = reinterpret_cast<StreamSettings*>(&rx_buffer[1]);
+    cmd->set_settings(*settings);
+    emit_command("streamer", cmd);
 }
 
 }  // namespace ybotln

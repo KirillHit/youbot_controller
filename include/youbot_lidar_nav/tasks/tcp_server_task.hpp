@@ -23,6 +23,7 @@ private:
     void receive();
     void process_route();
     void send_stop();
+    void process_stream();
 
     sockets::TCPServer server;
     std::vector<uint8_t> tx_buffer;

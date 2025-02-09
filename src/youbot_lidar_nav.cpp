@@ -1,4 +1,5 @@
 #include "yaml-cpp/yaml.h"
+#include "youbot_lidar_nav/tasks/streamer_task.hpp"
 #include "youbot_lidar_nav/tasks/driver_task.hpp"
 #include "youbot_lidar_nav/tasks/lidar_task.hpp"
 #include "youbot_lidar_nav/tasks/planner_task.hpp"
@@ -34,7 +35,7 @@ void default_parameters()
     PARAMETERS.set<std::string>("lidar/device_name", "/dev/ttyACM0");
     PARAMETERS.set<int>("lidar/baudrate", 115200);
     PARAMETERS.set<double>("lidar/viewing_angle", 90);
-    PARAMETERS.set<std::string>("streamer/camera_dev", "/dev/video0");
+    PARAMETERS.set<int>("streamer/camera_dev", 0);
     PARAMETERS.set<std::string>("streamer/server_ip", "127.0.0.1");
     PARAMETERS.set<int>("streamer/port", 10001);
     PARAMETERS.set<int>("streamer/quality", 70);
@@ -42,6 +43,8 @@ void default_parameters()
     PARAMETERS.set<int>("streamer/pack_size", 4096);
     PARAMETERS.set<int>("streamer/width", 720);
     PARAMETERS.set<int>("streamer/height", 480);
+    PARAMETERS.set<int>("streamer/delay", 30);
+    PARAMETERS.set<bool>("streamer/stream_switch", false);
 }
 
 void load_config()
@@ -61,6 +64,16 @@ void load_config()
     PARAMETERS.set("tcp_server/timeout", config["tcp_server"]["timeout"].as<int>());
     PARAMETERS.set("lidar/device_name", config["lidar"]["device_name"].as<std::string>());
     PARAMETERS.set("lidar/baudrate", config["lidar"]["baudrate"].as<int>());
+    PARAMETERS.set("streamer/camera_dev", config["streamer"]["camera_dev"].as<int>());
+    PARAMETERS.set("streamer/server_ip", config["streamer"]["server_ip"].as<std::string>());
+    PARAMETERS.set("streamer/port", config["streamer"]["port"].as<int>());
+    PARAMETERS.set("streamer/quality", config["streamer"]["quality"].as<int>());
+    PARAMETERS.set("streamer/interval", config["streamer"]["interval"].as<int>());
+    PARAMETERS.set("streamer/pack_size", config["streamer"]["pack_size"].as<int>());
+    PARAMETERS.set("streamer/width", config["streamer"]["width"].as<int>());
+    PARAMETERS.set("streamer/height", config["streamer"]["height"].as<int>());
+    PARAMETERS.set("streamer/delay", config["streamer"]["delay"].as<int>());
+    PARAMETERS.set("streamer/stream_switch", config["streamer"]["stream_switch"].as<bool>());
 
     LOGGER_STREAM(MSG_LVL::INFO, "Loading parameters completed successfully");
 }
@@ -95,10 +108,12 @@ int main()
     auto tcp_server_task = std::make_unique<TcpServerTask>("tcp_server");
     auto lidar_task = std::make_unique<LidarTask>("lidar");
     auto planner_task = std::make_unique<PlannerTask>("planner");
+    auto streamer_task = std::make_unique<StreamerTask>("streamer");
     task_pool.add_task(std::move(driver_task));
     task_pool.add_task(std::move(tcp_server_task));
     task_pool.add_task(std::move(lidar_task));
     task_pool.add_task(std::move(planner_task));
+    task_pool.add_task(std::move(streamer_task));
 
     task_pool.start_all();
 
