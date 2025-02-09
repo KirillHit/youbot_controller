@@ -13,6 +13,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Network)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Network)
+find_package(OpenCV REQUIRED)
+
+add_subdirectory(lib)
+include_directories(${OpenCV_INCLUDE_DIRS})
 
 set(PROJECT_SOURCES
     main.cpp
@@ -27,7 +31,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(YoubotRC
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        planner.h
+
+        comandor_thread.h comandor_thread.cpp
+        stream_thread.h stream_thread.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET YoubotRC APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -47,7 +53,13 @@ else()
     endif()
 endif()
 
-target_link_libraries(YoubotRC PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Network)
+target_link_libraries(
+        YoubotRC
+    PRIVATE
+        Qt${QT_VERSION_MAJOR}::Widgets
+        Qt${QT_VERSION_MAJOR}::Network
+        ${OpenCV_LIBS}
+        udp_streamer)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an

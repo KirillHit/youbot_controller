@@ -22,7 +22,32 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout" stretch="5,0,3">
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout"/>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QLabel" name="streamLabel">
+          <property name="styleSheet">
+           <string notr="true">background-color: rgb(0, 0, 0); 
+color: rgb(255, 255, 255);
+font: 24pt &quot;Ubuntu Sans&quot;;</string>
+          </property>
+          <property name="lineWidth">
+           <number>1</number>
+          </property>
+          <property name="text">
+           <string>No video</string>
+          </property>
+          <property name="textFormat">
+           <enum>Qt::PlainText</enum>
+          </property>
+          <property name="scaledContents">
+           <bool>false</bool>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
        <widget class="Line" name="line">
@@ -32,7 +57,7 @@
        </widget>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,0,0,0,0,0,10">
+       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,0,0,0,0,0,0,0,10">
         <item>
          <widget class="QLabel" name="label_11">
           <property name="font">
@@ -61,7 +86,7 @@
              </font>
             </property>
             <property name="text">
-             <string>192.168.10.20</string>
+             <string>127.0.0.1</string>
             </property>
            </widget>
           </item>
@@ -248,6 +273,25 @@
            </widget>
           </item>
          </layout>
+        </item>
+        <item>
+         <widget class="Line" name="line_4">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="butStreamSettings">
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Stream Settings</string>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="Line" name="line_2">

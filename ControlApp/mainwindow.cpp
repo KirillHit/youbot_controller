@@ -2,30 +2,23 @@
 #include "./ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow), tcpSocket(new QTcpSocket(this))
+    : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
     buttonInit();
     sliderInit();
     uiValidator();
-
-    txBuffer.resize(TX_MSG_SIZE, 0);
-    rxBuffer.resize(RX_MSG_SIZE);
-
-    tcpResendTimer = new QTimer(this);
-    connect(tcpResendTimer, &QTimer::timeout, this, &MainWindow::buttonHandle);
-    tcpResendTimer->start(resendTime);
-
-    connect(tcpSocket, &QAbstractSocket::errorOccurred, this, &MainWindow::displayNetError);
-    connect(tcpSocket, &QAbstractSocket::disconnected, this, &MainWindow::disconnectedHandle);
+    comandorInit();
 }
 
 MainWindow::~MainWindow()
 {
-    disconnect();
     delete ui;
 }
+
+/******************************** Init methods ********************************/
 
 void MainWindow::sliderInit()
 {
@@ -36,129 +29,8 @@ void MainWindow::sliderInit()
     connect(ui->sliderAngVel, &QAbstractSlider::valueChanged, this, &MainWindow::sliderHandle);
 }
 
-void MainWindow::sliderHandle(int value)
-{
-    QObject *pObject = sender();
-
-    if (pObject == ui->sliderLinVel)
-    {
-        ui->labelLinVel->setText(QString::number(value / 100.0, 'f', 2));
-    }
-    else if (pObject == ui->sliderAngVel)
-    {
-        ui->lableAngVel->setText(QString::number(value / 100.0, 'f', 2));
-    }
-}
-
-void MainWindow::requestNewConnection()
-{
-    ui->butConnect->setEnabled(false);
-    tcpSocket->abort();
-    tcpSocket->connectToHost(ui->lineIp->text(), ui->linePort->text().toInt());
-}
-
-void MainWindow::disconnect()
-{
-    sendStop();
-    tcpSocket->waitForBytesWritten(1000);
-    tcpSocket->abort();
-    ui->butConnect->setEnabled(true);
-}
-
-void MainWindow::sendTcp(const size_t msg_size)
-{
-    if (tcpSocket->state() != QAbstractSocket::ConnectedState)
-    {
-        return;
-    }
-    tcpSocket->write(reinterpret_cast<char *>(txBuffer.data()), msg_size);
-}
-
-
-void MainWindow::sendRouteMsg(const std::vector<RouteStep>::const_iterator begin,
-                              const std::vector<RouteStep>::const_iterator end, bool reset)
-{
-    ptrdiff_t num_step = std::distance(begin, end);
-    if (num_step <= 0)
-    {
-        qWarning("Incorrect iterators");
-        return;
-    }
-    txBuffer[0] = static_cast<uint8_t>(DataId::GO_ROUTE);
-    RouteMsgHeader *route_header = reinterpret_cast<RouteMsgHeader *>(&txBuffer[1]);
-    route_header->reset_route = reset;
-    route_header->step_count = std::min(static_cast<size_t>(num_step), MAX_ROUTE_STEPS);
-
-    RouteStepMsg *step_msg = reinterpret_cast<RouteStepMsg *>(&txBuffer[3]);
-    auto step = begin;
-    for (size_t step_idx = 0; step_idx < route_header->step_count; ++step_idx, ++step_msg, ++step) {
-        step_msg->longitudinal_vel = static_cast<int16_t>(step->longitudinal_vel * 1000);
-        step_msg->transversal_vel = static_cast<int16_t>(step->transversal_vel * 1000);
-        step_msg->angular_vel = static_cast<int16_t>(step->angular_vel * 1000);
-        step_msg->duration = static_cast<int16_t>(step->duration);
-    }
-
-    sendTcp(TX_MSG_SIZE);
-}
-
-
-void MainWindow::sendRoute(const std::vector<RouteStep> &route_list)
-{
-    size_t num_msg = 1 + ((route_list.size() - 1) / MAX_ROUTE_STEPS);
-    auto step = route_list.begin();
-    for (size_t msg_idx = 0; msg_idx < num_msg; ++msg_idx, step+=MAX_ROUTE_STEPS)
-    {
-        sendRouteMsg(step, route_list.end(), !static_cast<bool>(msg_idx));
-    }
-}
-
-void MainWindow::sendStop()
-{
-    std::vector<RouteStep> route_list(1);
-    route_list[0].longitudinal_vel = 0;
-    route_list[0].transversal_vel = 0;
-    route_list[0].angular_vel = 0;
-    route_list[0].duration = 0;
-    sendRoute(route_list);
-}
-
-void MainWindow::displayNetError(QAbstractSocket::SocketError socketError)
-{
-    switch (socketError)
-    {
-    case QAbstractSocket::RemoteHostClosedError:
-        break;
-    case QAbstractSocket::HostNotFoundError:
-        QMessageBox::information(this, tr("Tcp Client"),
-                                 tr("The host was not found. Please check the "
-                                    "host name and port settings."));
-        break;
-    case QAbstractSocket::ConnectionRefusedError:
-        QMessageBox::information(this, tr("Tcp Client"),
-                                 tr("The connection was refused by the peer. "
-                                    "Make sure the server is running, "
-                                    "and check that the ip address "
-                                    "settings are correct."));
-        break;
-    default:
-        QMessageBox::information(
-            this, tr("Tcp Client"),
-            tr("The following error occurred: %1.").arg(tcpSocket->errorString()));
-    }
-
-    ui->butConnect->setEnabled(true);
-}
-
-void MainWindow::disconnectedHandle()
-{
-    ui->butConnect->setEnabled(true);
-}
-
 void MainWindow::buttonInit()
 {
-    connect(ui->butConnect, &QPushButton::pressed, this, &MainWindow::requestNewConnection);
-    connect(ui->butDisconnect, &QPushButton::pressed, this, &MainWindow::disconnect);
-
     connect(ui->butLeftForward, &QPushButton::pressed, this, &MainWindow::buttonHandle);
     connect(ui->butLeft, &QPushButton::pressed, this, &MainWindow::buttonHandle);
     connect(ui->butLeftBack, &QPushButton::pressed, this, &MainWindow::buttonHandle);
@@ -195,6 +67,85 @@ void MainWindow::uiValidator()
     ui->linePort->setValidator(new QIntValidator(1024, 65535, this));
 }
 
+void MainWindow::comandorInit()
+{
+    connect(&comandorThread, &ComandorThread::netError, this, &MainWindow::displayNetError);
+    connect(&comandorThread, &ComandorThread::connected, this, &MainWindow::connectedHandle);
+    connect(&comandorThread, &ComandorThread::disconnected, this, &MainWindow::disconnectedHandle);
+
+    connect(ui->butConnect, &QPushButton::pressed, this, [=]() {
+        this->comandorThread.connectHost(ui->lineIp->text(), ui->linePort->text().toInt());
+    });
+    connect(ui->butDisconnect,
+            &QPushButton::pressed,
+            &comandorThread,
+            &ComandorThread::disconnectHost);
+    connect(&comandorThread, &ComandorThread::requestControl, this, &MainWindow::buttonHandle);
+}
+
+/*********************************** Slots ***********************************/
+
+void MainWindow::displayNetError(QAbstractSocket::SocketError socketError)
+{
+    switch (socketError)
+    {
+    case QAbstractSocket::RemoteHostClosedError:
+        break;
+    case QAbstractSocket::HostNotFoundError:
+        QMessageBox::information(this, tr("Tcp Client"),
+                                 tr("The host was not found. Please check the "
+                                    "host name and port settings."));
+        break;
+    case QAbstractSocket::ConnectionRefusedError:
+        QMessageBox::information(this, tr("Tcp Client"),
+                                 tr("The connection was refused by the peer. "
+                                    "Make sure the server is running, "
+                                    "and check that the ip address "
+                                    "settings are correct."));
+        break;
+    default:
+        QMessageBox::information(this,
+                                 tr("Tcp Client"),
+                                 tr("The following error occurred: %1. See "
+                                    "https://doc.qt.io/qt-6/qabstractsocket.html#SocketError-enum")
+                                     .arg(static_cast<int>(socketError)));
+    }
+
+    ui->butConnect->setEnabled(true);
+}
+
+void MainWindow::disconnectedHandle()
+{
+    ui->butConnect->setEnabled(true);
+    ui->butConnect->setDown(false);
+    ui->butDisconnect->setEnabled(false);
+    ui->butDisconnect->setDown(true);
+}
+
+void MainWindow::connectedHandle()
+{
+    ui->butConnect->setEnabled(false);
+    ui->butConnect->setDown(true);
+    ui->butDisconnect->setEnabled(true);
+    ui->butDisconnect->setDown(false);
+}
+
+/********************************* UI handle *********************************/
+
+void MainWindow::sliderHandle(int value)
+{
+    QObject *pObject = sender();
+
+    if (pObject == ui->sliderLinVel)
+    {
+        ui->labelLinVel->setText(QString::number(value / 100.0, 'f', 2));
+    }
+    else if (pObject == ui->sliderAngVel)
+    {
+        ui->lableAngVel->setText(QString::number(value / 100.0, 'f', 2));
+    }
+}
+
 void MainWindow::buttonHandle()
 {
     std::vector<RouteStep> route(1);
@@ -224,8 +175,7 @@ void MainWindow::buttonHandle()
                                                     static_cast<int>(ui->butRotRight->isDown()))) /
                                100.0;
     }
-    sendRoute(route);
-    tcpResendTimer->start(resendTime);
+    comandorThread.sendRoute(route);
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *keyEvent)

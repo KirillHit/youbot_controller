@@ -13,8 +13,10 @@
 #include <QTimer>
 #include <vector>
 
+#include "comandor_thread.h"
 #include "planner.h"
 #include "protocol.h"
+#include "stream_thread.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -27,43 +29,35 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-  public:
+public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-  protected:
-    void keyPressEvent(QKeyEvent *keyEvent) override;
-    void keyReleaseEvent(QKeyEvent *keyEvent) override;
-
-    void pressBut(QPushButton *button);
-    void releasBut(QPushButton *button);
-    void buttonInit();
-    void buttonHandle();
-
-    void sliderInit();
-    void sliderHandle(int value);
-
-    void uiValidator();
-
-    void requestNewConnection();
-    void disconnect();
-    void sendTcp(const size_t msg_size = TX_MSG_SIZE);
+public slots:
     void displayNetError(QAbstractSocket::SocketError socketError);
     void disconnectedHandle();
+    void connectedHandle();
 
-    void sendRouteMsg(const std::vector<RouteStep>::const_iterator begin,
-                      const std::vector<RouteStep>::const_iterator end, bool reset);
-    void sendRoute(const std::vector<RouteStep> &route_list);
-    void sendStop();
+signals:
+    void requestNewConnection();
 
-  private:
+private:
+    void buttonInit();
+    void sliderInit();
+    void uiValidator();
+    void comandorInit();
+
+    void keyPressEvent(QKeyEvent *keyEvent) override;
+    void keyReleaseEvent(QKeyEvent *keyEvent) override;
+    void pressBut(QPushButton *button);
+    void releasBut(QPushButton *button);
+    void buttonHandle();
+    void sliderHandle(int value);
+
+private:
     Ui::MainWindow *ui;
-    QTcpSocket *tcpSocket = nullptr;
-    QTimer *tcpResendTimer = nullptr;
-    const int resendTime = 500;      // ms
+    ComandorThread comandorThread;
     const int routeResolution = 600; // ms
-    std::vector<uint8_t> txBuffer;
-    std::vector<uint8_t> rxBuffer;
 };
 
 #endif // MAINWINDOW_H

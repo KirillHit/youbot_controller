@@ -1,0 +1,3 @@
+[submodule "ControlApp/lib/udp_streamer"]
+	path = ControlApp/lib/udp_streamer
+	url = https://github.com/KirillHit/udp_streamer.git
