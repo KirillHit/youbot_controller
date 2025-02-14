@@ -34,7 +34,6 @@ void ComandorThread::disconnectHost()
     sendStop();
     tcpSocket->waitForBytesWritten(1000);
     tcpSocket->abort();
-    emit disconnected();
 }
 
 /*********************************** Other ***********************************/
@@ -97,4 +96,9 @@ void ComandorThread::sendStreamSettings(const StreamSettings &settings)
     txBuffer[0] = static_cast<uint8_t>(DataId::SET_CAMERA);
     std::memcpy(&txBuffer[1], &settings, sizeof(StreamSettings));
     sendTcp();
+}
+
+bool ComandorThread::isConnected() const
+{
+    return tcpSocket->state() == QAbstractSocket::ConnectedState;
 }

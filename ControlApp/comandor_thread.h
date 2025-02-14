@@ -29,6 +29,8 @@ public:
     void sendStop();
     void sendStreamSettings(const StreamSettings &settings);
 
+    bool isConnected() const;
+
 public slots:
     void connectHost(const QString &host_ip, const quint16 &port);
     void disconnectHost();

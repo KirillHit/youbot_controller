@@ -114,8 +114,6 @@ void MainWindow::streamInit()
         .server_ip = 0,
         .server_port = 10001,
         .pack_size = 4096,
-        .frame_width = 720,
-        .frame_height = 480,
         .frame_interval = 50,
         .encode_quality = 70,
         .stream_switch = 1,
@@ -132,23 +130,25 @@ void MainWindow::displayNetError(QAbstractSocket::SocketError socketError)
     case QAbstractSocket::RemoteHostClosedError:
         break;
     case QAbstractSocket::HostNotFoundError:
-        QMessageBox::information(this, tr("Tcp Client"),
-                                 tr("The host was not found. Please check the "
-                                    "host name and port settings."));
+        QMessageBox::warning(this,
+                             tr("Tcp Client"),
+                             tr("The host was not found. Please check the "
+                                "host name and port settings."));
         break;
     case QAbstractSocket::ConnectionRefusedError:
-        QMessageBox::information(this, tr("Tcp Client"),
-                                 tr("The connection was refused by the peer. "
-                                    "Make sure the server is running, "
-                                    "and check that the ip address "
-                                    "settings are correct."));
+        QMessageBox::warning(this,
+                             tr("Tcp Client"),
+                             tr("The connection was refused by the peer. "
+                                "Make sure the server is running, "
+                                "and check that the ip address "
+                                "settings are correct."));
         break;
     default:
-        QMessageBox::information(this,
-                                 tr("Tcp Client"),
-                                 tr("The following error occurred: %1. See "
-                                    "https://doc.qt.io/qt-6/qabstractsocket.html#SocketError-enum")
-                                     .arg(static_cast<int>(socketError)));
+        QMessageBox::warning(this,
+                             tr("Tcp Client"),
+                             tr("The following error occurred: %1. See "
+                                "https://doc.qt.io/qt-6/qabstractsocket.html#SocketError-enum")
+                                 .arg(static_cast<int>(socketError)));
     }
 
     ui->butConnect->setEnabled(true);
@@ -182,6 +182,14 @@ void MainWindow::streamSettingsHandle()
         return;
     }
 
+    if (not comandorThread.isConnected()) {
+        QMessageBox::warning(
+            this,
+            tr("Camera stream"),
+            tr("Before setting up the stream, the program must connect to the robot server."));
+        return;
+    }
+
     streamDlg = new QDialog(this);
     streamDlg->setWindowTitle(tr("Streamer settings"));
 
@@ -197,8 +205,6 @@ void MainWindow::streamSettingsHandle()
     QLineEdit *linePort = new QLineEdit(QString::number(streamSettings.server_port), streamDlg);
     QLineEdit *lineDelay = new QLineEdit(QString::number(streamSettings.delay), streamDlg);
     QLineEdit *linePack = new QLineEdit(QString::number(streamSettings.pack_size), streamDlg);
-    QLineEdit *lineWidth = new QLineEdit(QString::number(streamSettings.frame_width), streamDlg);
-    QLineEdit *lineHeight = new QLineEdit(QString::number(streamSettings.frame_height), streamDlg);
     QLineEdit *lineInterval = new QLineEdit(QString::number(streamSettings.frame_interval),
                                             streamDlg);
     QLineEdit *lineQuality = new QLineEdit(QString::number(streamSettings.encode_quality),
@@ -213,8 +219,6 @@ void MainWindow::streamSettingsHandle()
     linePort->setValidator(new QIntValidator(1, 65535, this));
     lineDelay->setValidator(new QIntValidator(1, 32767, this));
     linePack->setValidator(new QIntValidator(1, 65535, this));
-    lineWidth->setValidator(new QIntValidator(1, 65535, this));
-    lineHeight->setValidator(new QIntValidator(1, 65535, this));
     lineInterval->setValidator(new QIntValidator(0, 65535, this));
     lineQuality->setValidator(new QIntValidator(0, 100, this));
 
@@ -232,8 +236,6 @@ void MainWindow::streamSettingsHandle()
     layout->addRow(tr("Server port:"), linePort);
     layout->addRow(tr("Delay:"), lineDelay);
     layout->addRow(tr("Pack size:"), linePack);
-    layout->addRow(tr("Frame width:"), lineWidth);
-    layout->addRow(tr("Frame height:"), lineHeight);
     layout->addRow(tr("Frame interval:"), lineInterval);
     layout->addRow(tr("Encode quality:"), lineQuality);
     layout->addWidget(btn_box);
@@ -245,8 +247,6 @@ void MainWindow::streamSettingsHandle()
         streamSettings.server_ip = iptoint(lineIp->text().toStdString());
         streamSettings.server_port = linePort->text().toInt();
         streamSettings.pack_size = linePack->text().toInt();
-        streamSettings.frame_width = lineWidth->text().toInt();
-        streamSettings.frame_height = lineHeight->text().toInt();
         streamSettings.frame_interval = lineInterval->text().toInt();
         streamSettings.encode_quality = lineQuality->text().toInt();
         streamSettings.stream_switch = radEnable->isChecked();

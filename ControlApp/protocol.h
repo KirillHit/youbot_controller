@@ -42,8 +42,6 @@ struct StreamSettings
     uint32_t server_ip;
     uint16_t server_port;
     uint16_t pack_size;
-    uint16_t frame_width;
-    uint16_t frame_height;
     uint16_t frame_interval;
     uint8_t encode_quality;
     uint16_t stream_switch : 1;
