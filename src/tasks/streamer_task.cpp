@@ -19,8 +19,6 @@ void StreamerTask::update_parameters()
     settings.encode_quality = PARAMETERS.get<int>("streamer/quality");
     settings.frame_interval = PARAMETERS.get<int>("streamer/interval");
     settings.pack_size = PARAMETERS.get<int>("streamer/pack_size");
-    settings.frame_width = PARAMETERS.get<int>("streamer/width");
-    settings.frame_height = PARAMETERS.get<int>("streamer/height");
     settings.delay = PARAMETERS.get<int>("streamer/delay");
     settings.stream_switch = PARAMETERS.get<bool>("streamer/stream_switch");
     set_settings(settings);
@@ -41,7 +39,6 @@ void StreamerTask::set_settings(const StreamSettings& settings)
     video_transmitter.set_encode_quality(settings.encode_quality);
     video_transmitter.set_interval(settings.frame_interval);
     video_transmitter.set_pack_size(settings.pack_size);
-    video_transmitter.set_size(settings.frame_width, settings.frame_height);
     delay = std::chrono::milliseconds(settings.delay);
     stream_switch = settings.stream_switch;
 

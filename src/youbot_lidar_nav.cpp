@@ -41,8 +41,6 @@ void default_parameters()
     PARAMETERS.set<int>("streamer/quality", 70);
     PARAMETERS.set<int>("streamer/interval", 50);
     PARAMETERS.set<int>("streamer/pack_size", 4096);
-    PARAMETERS.set<int>("streamer/width", 720);
-    PARAMETERS.set<int>("streamer/height", 480);
     PARAMETERS.set<int>("streamer/delay", 30);
     PARAMETERS.set<bool>("streamer/stream_switch", false);
 }
@@ -70,8 +68,6 @@ void load_config()
     PARAMETERS.set("streamer/quality", config["streamer"]["quality"].as<int>());
     PARAMETERS.set("streamer/interval", config["streamer"]["interval"].as<int>());
     PARAMETERS.set("streamer/pack_size", config["streamer"]["pack_size"].as<int>());
-    PARAMETERS.set("streamer/width", config["streamer"]["width"].as<int>());
-    PARAMETERS.set("streamer/height", config["streamer"]["height"].as<int>());
     PARAMETERS.set("streamer/delay", config["streamer"]["delay"].as<int>());
     PARAMETERS.set("streamer/stream_switch", config["streamer"]["stream_switch"].as<bool>());
 

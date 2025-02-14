@@ -16,7 +16,5 @@ streamer:
   quality: 70
   interval: 50
   pack_size: 4096
-  width: 720
-  height: 480
   delay: 30
   stream_switch: true
