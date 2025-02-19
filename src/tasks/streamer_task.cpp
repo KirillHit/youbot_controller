@@ -26,7 +26,7 @@ void StreamerTask::update_parameters()
 
 void StreamerTask::open_camera(const int& camera_dev)
 {
-    if (!camera_cap.open(camera_dev))
+    if (!camera_cap.open(camera_dev, cv::CAP_V4L2))
     {
         stream_switch = false;
         LOGGER_STREAM(MSG_LVL::ERROR, "Couldn't start the camera: " << camera_dev << "!");

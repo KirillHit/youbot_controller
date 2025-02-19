@@ -31,6 +31,11 @@ public:
     void add_command(std::shared_ptr<Command> command);
 
 protected:
+    Task(const Task&) = delete;
+    Task& operator=(const Task&) = delete;
+    Task(Task&&) = delete;
+    Task& operator=(Task&&) = delete;
+
     // Main code of the child task
     virtual void task() = 0;
     // Command interface for child classes
@@ -69,6 +74,11 @@ public:
     void stop_all();
 
 private:
+    TaskPool(const TaskPool&) = delete;
+    TaskPool& operator=(const TaskPool&) = delete;
+    TaskPool(TaskPool&&) = delete;
+    TaskPool& operator=(TaskPool&&) = delete;
+
     std::shared_mutex tasks_lock;
     std::map<std::string, std::unique_ptr<Task>> tasks;
 };

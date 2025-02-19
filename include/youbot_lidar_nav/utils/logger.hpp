@@ -37,8 +37,11 @@ public:
 
 private:
     Logger() = default;
-    Logger(const Logger& root) = delete;
+    Logger(const Logger&) = delete;
     Logger& operator=(const Logger&) = delete;
+    Logger(Logger&&) = delete;
+    Logger& operator=(Logger&&) = delete;
+
     std::string get_time();
 
     bool debug = false;

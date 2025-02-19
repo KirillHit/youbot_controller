@@ -34,8 +34,11 @@ public:
 
 private:
     ParameterServer() = default;
-    ParameterServer(const ParameterServer& root) = delete;
+    ParameterServer(const ParameterServer&) = delete;
     ParameterServer& operator=(const ParameterServer&) = delete;
+    ParameterServer(ParameterServer&&) = delete;
+    ParameterServer& operator=(ParameterServer&&) = delete;
+
     template <class T>
     std::map<std::string, T>& get_params_map()
     {
