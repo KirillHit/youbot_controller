@@ -22,6 +22,7 @@ private:
     void task() override;
     void open_camera(const int& camera_dev);
     bool camera_processing();
+    void detect(cv::Mat& src);
 
     std::string inttoip(const uint32_t& src) const;
     uint32_t iptoint(const std::string& src) const;

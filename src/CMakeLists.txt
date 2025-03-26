@@ -6,7 +6,13 @@ target_compile_features(youbot_lidar_nav PUBLIC cxx_std_20)
 
 add_dependencies(youbot_lidar_nav urg_library)
 
-target_link_libraries(youbot_lidar_nav YouBotDriver yaml-cpp udp_streamer ${urg_library_LIB})
+target_link_libraries(youbot_lidar_nav 
+  YouBotDriver 
+  yaml-cpp 
+  udp_streamer 
+  ${urg_library_LIB} 
+  "${CMAKE_CURRENT_SOURCE_DIR}/../lib/onnxruntime/lib/libonnxruntime.so"
+)
 
 target_include_directories(
     youbot_lidar_nav
@@ -14,6 +20,7 @@ target_include_directories(
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
     $<TARGET_PROPERTY:YouBotDriver,INCLUDE_DIRECTORIES>
     $<BUILD_INTERFACE:${urg_library_INCLUDE}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../lib/onnxruntime/include>
 )
 
 target_sources(

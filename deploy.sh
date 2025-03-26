@@ -7,6 +7,7 @@ DEST_DIR="$5"
 USER="$6"
 PASS="$7"
 CFG_DIR="$8"
+MODEL_DIR="$9"
 
 # kill gdbserver on target and delete old binary
 sshpass -p ${PASS} ssh ${USER}@${DEST_IP} "sh -c 'pkill -f gdbserver; rm -rf ${DEST_DIR}/${BINARY} || exit 0'"
@@ -16,6 +17,12 @@ sshpass -p ${PASS} scp ${SRC_DIR}${BINARY} ${USER}@${DEST_IP}:${DEST_DIR}/${BINA
 
 # send config to target
 sshpass -p ${PASS} scp -r ${CFG_DIR} ${USER}@${DEST_IP}:${DEST_DIR}
+
+# send model to target
+sshpass -p ${PASS} scp -r ${MODEL_DIR} ${USER}@${DEST_IP}:${DEST_DIR}
+
+# send model to target
+sshpass -p ${PASS} scp -r "/home/ubuntu/git/youbot_lidar_nav/onnxruntime" ${USER}@${DEST_IP}:${DEST_DIR}
 
 # start gdbserver on target
 # sshpass -p ${PASS} ssh -t ${USER}@${DEST_IP} "sh -c 'cd ${DEST_DIR}; gdbserver localhost:${DEBUG_PORT} ${BINARY}'"

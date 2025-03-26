@@ -1,5 +1,6 @@
 #include "youbot_lidar_nav/tasks/streamer_task.hpp"
 
+#include "yolo/det/YOLO10.hpp"
 #include "youbot_lidar_nav/utils/logger.hpp"
 #include "youbot_lidar_nav/utils/parameter_server.hpp"
 
@@ -81,8 +82,19 @@ bool StreamerTask::camera_processing()
         return false;
     }
 
+    detect(src);
+
     video_transmitter.send_img(src);
     return true;
+}
+
+void StreamerTask::detect(cv::Mat& src)
+{
+    static YOLO10Detector detector(std::string(SOURCE_DIR) + "/models/yolo10n.onnx",
+                                   std::string(SOURCE_DIR) + "/models/coco.names",
+                                   false);
+    std::vector<Detection> results = detector.detect(src);
+    detector.drawBoundingBox(src, results);
 }
 
 std::string StreamerTask::inttoip(const uint32_t& src) const

@@ -39,6 +39,7 @@
                 "${config:USER}",
                 "${config:PASS}",
                 "${config:CFG_DIR}",
+                "${config:MODEL_DIR}",
             ],
             "problemMatcher": {
                 "base": "$gcc",
