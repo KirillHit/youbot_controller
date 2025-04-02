@@ -36,7 +36,7 @@ void PlannerTask::task()
             std::vector<double> radian;
             long time_stamp;
             distant_request->data(length, radian, time_stamp);
-            LOGGER_STREAM(MSG_LVL::DEBUG, time_stamp << " : " << length.size());
+            // LOGGER_STREAM(MSG_LVL::DEBUG, time_stamp << " : " << length.size());
         }
         else
         {

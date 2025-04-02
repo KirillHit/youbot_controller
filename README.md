@@ -1,23 +1,28 @@
-# youbot_lidar_nav
+# Youbot controller
 
-dependents: boost, cmake, make
+Простое многопоточное приложение для управления роботом youbot. Создавалась в учебных целях, поддерживает следующие функции:
 
+* Многопоточное выполнение с помощью менеджера потоков
+* Логирование
+* Настройка через файлы конфигурации
+* Управление через qt приложение по TCP
+* Трансляция изображения с камеры по UDP
+* Разметка изображения с помощью YOLO10 с использованием [YOLOs-CPP](https://github.com/Geekgineer/YOLOs-CPP/tree/main)
+* Возможность получения данных с лидара
 
-## No EtherCAT connection... Excecute as root
+## Запуск
 
-The following error message is caused by the youbot_driver_ros_interface binary in catkin_ws/devel/lib/youbot_driver_ros_interface/ which doesn't have permissions to an ethernet device:
+1. Клонируйте репозиторий
 
-```
-[ERROR] [1575985987.844141226]: No EtherCAT connection:
-[FATAL] [1575985987.844197919]: No socket connection on enx00e04c2151d2
-Excecute as root
-```
+    ``` bash
+    git clone https://github.com/KirillHit/youbot_controller.git --recurse-submodules
+    cd youbot_controller
+    ```
 
-See the original link: www.youbot-store.com/wiki/index.php/Execute_as_a_root. Usually, it's down, so check via the wayback machine.
+2. Запустите скрипт для установки onnxruntime
 
-In summary, to grant a binary permissions, run the following:
+    ``` bash
+    ./onnx_downlad.sh
+    ```
 
-``` bash
-$ sudo setcap cap_net_raw+ep <path_to_your_program_executable>/<name_of_your_program_executable>
-$ sudo ldconfig <path_to_your_program_executable>
-```
+3. Собирите приложение с помощью cmake

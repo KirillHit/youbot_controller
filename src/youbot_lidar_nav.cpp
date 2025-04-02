@@ -36,7 +36,7 @@ void default_parameters()
     PARAMETERS.set<int>("lidar/baudrate", 115200);
     PARAMETERS.set<double>("lidar/viewing_angle", 90);
     PARAMETERS.set<int>("streamer/camera_dev", 0);
-    PARAMETERS.set<std::string>("streamer/server_ip", "127.0.0.1");
+    PARAMETERS.set<std::string>("streamer/server_ip", "0.0.0.0");
     PARAMETERS.set<int>("streamer/port", 10001);
     PARAMETERS.set<int>("streamer/quality", 70);
     PARAMETERS.set<int>("streamer/interval", 50);
