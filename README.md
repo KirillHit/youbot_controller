@@ -22,7 +22,7 @@
 2. Запустите скрипт для установки onnxruntime
 
     ``` bash
-    ./onnx_downlad.sh
+    ./onnx_download.sh.sh
     ```
 
 3. Соберите приложение с помощью cmake
